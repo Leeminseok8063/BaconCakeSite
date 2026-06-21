@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BaconCake Root Console</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="admin-page">
+    <div class="site-shell admin-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html" aria-label="BaconCakeOfficial.com 일반 사이트로 이동">
+          <img src="assets/team-icon.png" alt="BaconCake 로고" />
+          <span>Root Console</span>
+        </a>
+        <nav class="main-nav" aria-label="관리 메뉴">
+          <a href="index.html">일반 사이트</a>
+          <a href="#noticeEditor">공지 관리</a>
+          <a href="#studioEditor">스튜디오</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="root-console" id="rootConsole">
+          <div class="section-heading">
+            <p class="eyebrow">Admin Only</p>
+            <h1>사이트 편집</h1>
+          </div>
+
+          <form class="admin-panel" id="settingsForm">
+            <div class="panel-title">
+              <span>사이트 문구</span>
+              <button id="resetSettings" type="button">기본값</button>
+            </div>
+            <div class="settings-grid">
+              <label>
+                상단 제목
+                <input id="brandName" type="text" maxlength="44" required />
+              </label>
+              <label>
+                주소/타이틀
+                <input id="siteTitle" type="text" maxlength="44" required />
+              </label>
+              <label>
+                히어로 작은 글씨
+                <input id="heroEyebrow" type="text" maxlength="64" required />
+              </label>
+              <label>
+                메인 제목
+                <input id="heroTitle" type="text" maxlength="36" required />
+              </label>
+              <label class="wide-field">
+                소개 문구
+                <textarea id="heroDescription" rows="3" maxlength="170" required></textarea>
+              </label>
+              <label>
+                버튼 문구
+                <input id="primaryCta" type="text" maxlength="24" required />
+              </label>
+              <label>
+                공지 상단 글씨
+                <input id="noticeEyebrow" type="text" maxlength="44" required />
+              </label>
+              <label>
+                공지 제목
+                <input id="noticeTitle" type="text" maxlength="24" required />
+              </label>
+              <label>
+                메뉴 공지 이름
+                <input id="noticeNavLabel" type="text" maxlength="18" required />
+              </label>
+              <label>
+                스튜디오 작은 글씨
+                <input id="studioEyebrow" type="text" maxlength="44" required />
+              </label>
+              <label>
+                스튜디오 제목
+                <input id="studioTitle" type="text" maxlength="24" required />
+              </label>
+            </div>
+            <button class="primary-action" type="submit">사이트 문구 저장</button>
+          </form>
+
+          <form class="admin-panel" id="studioForm">
+            <div class="panel-title">
+              <span id="studioEditor">스튜디오 노트</span>
+              <button id="clearStudioNotes" type="button">노트 전체 삭제</button>
+            </div>
+            <div class="settings-grid">
+              <label>
+                번호
+                <input id="studioNoteNumber" type="text" maxlength="4" placeholder="예: 01" required />
+              </label>
+              <label>
+                제목
+                <input id="studioNoteTitle" type="text" maxlength="34" placeholder="예: Game Development" required />
+              </label>
+              <label class="wide-field">
+                설명
+                <textarea id="studioNoteBody" rows="3" maxlength="120" placeholder="스튜디오 노트 설명을 작성하세요." required></textarea>
+              </label>
+            </div>
+            <div class="form-actions">
+              <button class="primary-action" id="submitStudioNote" type="submit">노트 등록</button>
+              <button class="secondary-action hidden" id="cancelStudioEdit" type="button">수정 취소</button>
+            </div>
+          </form>
+
+          <form class="admin-panel" id="postForm">
+            <div class="panel-title">
+              <span id="noticeEditor">공지 작성</span>
+              <button id="clearPosts" type="button">공지 전체 삭제</button>
+            </div>
+            <label>
+              제목
+              <input id="postTitle" type="text" maxlength="42" placeholder="예: BaconCake 공식 페이지 오픈" required />
+            </label>
+            <label>
+              내용
+              <textarea id="postBody" rows="4" maxlength="260" placeholder="방문자에게 보여줄 공지 내용을 작성하세요." required></textarea>
+            </label>
+            <div class="form-actions">
+              <button class="primary-action" id="submitPost" type="submit">글 등록</button>
+              <button class="secondary-action hidden" id="cancelEdit" type="button">수정 취소</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="section-grid">
+          <div class="section-heading">
+            <p class="eyebrow">Preview</p>
+            <h2>공지 미리보기</h2>
+          </div>
+          <div class="notice-list" id="noticeList" aria-live="polite"></div>
+        </section>
+
+        <section class="studio-section">
+          <div class="section-heading">
+            <p class="eyebrow" data-setting="studioEyebrow">Studio Notes</p>
+            <h2 data-setting="studioTitle">무엇을 만드는가</h2>
+          </div>
+          <div class="studio-grid" id="studioGrid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="site.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>
