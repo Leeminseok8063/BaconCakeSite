@@ -2,32 +2,17 @@ const detailView = document.querySelector("#detailView");
 
 async function renderDetail() {
   const params = new URLSearchParams(window.location.search);
-  const type = params.get("type");
-  const id = params.get("id");
+  const id = params.get("slug") || params.get("id");
 
   let item;
   let label;
   let backHref;
 
-  if (type === "notice") {
-    item = (await fetchPosts()).find((post) => post.id === id);
-    label = t("noticeLabel");
-    backHref = "index.html#news";
-  }
-
-  if (type === "studio") {
-    item = (await fetchStudioNotes()).find((note) => note.id === id);
-    label = t("studioLabel");
-    backHref = "index.html#studio";
-  }
-
-  if (type === "custom") {
-    item = await fetchCustomEntry(id);
-    const sections = await fetchCustomSections();
-    const section = sections.find((candidate) => candidate.id === item?.section_id);
-    label = section?.title || "Content";
-    backHref = section ? `index.html#section-${section.id}` : "index.html";
-  }
+  item = id ? await fetchCustomEntry(id) : null;
+  const sections = await fetchCustomSections();
+  const section = sections.find((candidate) => candidate.id === item?.section_id);
+  label = section?.title || "Content";
+  backHref = section ? `index.html#${sectionHash(section)}` : "index.html";
 
   if (!item) {
     detailView.innerHTML = `<article class="detail-card">
@@ -39,7 +24,7 @@ async function renderDetail() {
     return;
   }
 
-  const meta = type === "notice" && item.createdAt
+  const meta = item.createdAt
     ? `<time datetime="${item.createdAt}">${formatDate(item.createdAt)}</time>`
     : `<span>${escapeHtml(item.number || "")}</span>`;
 

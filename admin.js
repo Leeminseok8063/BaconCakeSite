@@ -1,26 +1,10 @@
 const settingsForm = document.querySelector("#settingsForm");
-const studioForm = document.querySelector("#studioForm");
-const studioNoteNumber = document.querySelector("#studioNoteNumber");
-const studioNoteTitle = document.querySelector("#studioNoteTitle");
-const studioNoteBody = document.querySelector("#studioNoteBody");
-const studioNoteMedia = document.querySelector("#studioNoteMedia");
-const submitStudioNote = document.querySelector("#submitStudioNote");
-const cancelStudioEdit = document.querySelector("#cancelStudioEdit");
-const postForm = document.querySelector("#postForm");
-const postTitle = document.querySelector("#postTitle");
-const postBody = document.querySelector("#postBody");
-const postMedia = document.querySelector("#postMedia");
-const submitPost = document.querySelector("#submitPost");
-const cancelEdit = document.querySelector("#cancelEdit");
-const clearPosts = document.querySelector("#clearPosts");
 const resetSettings = document.querySelector("#resetSettings");
-const clearStudioNotes = document.querySelector("#clearStudioNotes");
-const noticeList = document.querySelector("#noticeList");
-const studioGrid = document.querySelector("#studioGrid");
 const adminLogout = document.querySelector("#adminLogout");
 const sectionForm = document.querySelector("#sectionForm");
 const sectionEyebrow = document.querySelector("#sectionEyebrow");
 const sectionTitle = document.querySelector("#sectionTitle");
+const sectionSlug = document.querySelector("#sectionSlug");
 const sectionLayout = document.querySelector("#sectionLayout");
 const submitSection = document.querySelector("#submitSection");
 const cancelSectionEdit = document.querySelector("#cancelSectionEdit");
@@ -29,14 +13,13 @@ const customEntryForm = document.querySelector("#customEntryForm");
 const entrySection = document.querySelector("#entrySection");
 const entryNumber = document.querySelector("#entryNumber");
 const entryTitle = document.querySelector("#entryTitle");
+const entrySlug = document.querySelector("#entrySlug");
 const entryBody = document.querySelector("#entryBody");
 const entryMedia = document.querySelector("#entryMedia");
 const submitEntry = document.querySelector("#submitEntry");
 const cancelEntryEdit = document.querySelector("#cancelEntryEdit");
 const customSections = document.querySelector("#customSections");
 
-let editingId = null;
-let editingStudioId = null;
 let editingSectionId = null;
 let editingEntryId = null;
 
@@ -50,25 +33,24 @@ async function requireAdminSession() {
   return true;
 }
 
+function slugify(value, fallback = "") {
+  const slug = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || fallback;
+}
+
+function publicUrl(path) {
+  return canonicalUrl(path);
+}
+
 function fillSettingsForm(settings = loadSettings()) {
   Object.entries(settings).forEach(([key, value]) => {
     const field = settingsForm.querySelector(`#${key}`);
     if (field) field.value = value;
   });
-}
-
-function resetEditor() {
-  editingId = null;
-  postForm.reset();
-  submitPost.textContent = "글 등록";
-  cancelEdit.classList.add("hidden");
-}
-
-function resetStudioEditor() {
-  editingStudioId = null;
-  studioForm.reset();
-  submitStudioNote.textContent = "노트 등록";
-  cancelStudioEdit.classList.add("hidden");
 }
 
 function resetSectionEditor() {
@@ -81,7 +63,7 @@ function resetSectionEditor() {
 function resetEntryEditor() {
   editingEntryId = null;
   customEntryForm.reset();
-  submitEntry.textContent = "콘텐츠 등록";
+  submitEntry.textContent = "글 등록";
   cancelEntryEdit.classList.add("hidden");
 }
 
@@ -120,6 +102,10 @@ function adminErrorMessage(action, error) {
     return `${action} 실패: Supabase RLS 정책이 아직 맞지 않습니다. Supabase SQL Editor에서 supabase-setup.sql 전체를 다시 실행한 뒤, 관리자에서 로그아웃 후 재로그인해주세요.`;
   }
 
+  if (lowerMessage.includes("duplicate key") || message.includes("23505")) {
+    return `${action} 실패: 같은 주소 이름(slug)이 이미 있습니다. 다른 주소 이름을 입력해주세요.`;
+  }
+
   if (lowerMessage.includes("jwt") || lowerMessage.includes("expired") || lowerMessage.includes("invalid token")) {
     return `${action} 실패: 관리자 로그인 세션이 만료되었습니다. 로그아웃 후 다시 로그인해주세요.`;
   }
@@ -136,22 +122,16 @@ async function uploadMediaFiles(files, folder) {
   return Promise.all(
     uploads.map(async (file) => {
       const path = `${folder}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
-      let response;
-
-      try {
-        response = await fetch(storageObjectUrl(path), {
-          method: "POST",
-          headers: {
-            apikey: BACONCAKE_SUPABASE.anonKey,
-            Authorization: `Bearer ${String(token).trim()}`,
-            "Content-Type": file.type || "application/octet-stream",
-            "x-upsert": "false",
-          },
-          body: file,
-        });
-      } catch (error) {
-        throw new Error(`파일 업로드 요청을 만들지 못했습니다: ${file.name}. 다시 로그인한 뒤 시도하세요. (${error.message})`);
-      }
+      const response = await fetch(storageObjectUrl(path), {
+        method: "POST",
+        headers: {
+          apikey: BACONCAKE_SUPABASE.anonKey,
+          Authorization: `Bearer ${String(token).trim()}`,
+          "Content-Type": file.type || "application/octet-stream",
+          "x-upsert": "false",
+        },
+        body: file,
+      });
 
       if (!response.ok) {
         const message = await response.text();
@@ -167,73 +147,21 @@ async function uploadMediaFiles(files, folder) {
   );
 }
 
-async function createNotice(title, body, mediaItems) {
-  await supabaseRequest("/notices", {
-    method: "POST",
-    authToken: getStoredAdminToken(),
-    prefer: "return=minimal",
-    body: JSON.stringify(contentPayload({ title, body }, mediaItems)),
-  });
-}
-
-async function updateNotice(id, title, body, mediaItems) {
-  await supabaseRequest(`/notices?id=eq.${encodeURIComponent(id)}`, {
-    method: "PATCH",
-    authToken: getStoredAdminToken(),
-    prefer: "return=minimal",
-    body: JSON.stringify(contentPayload({ title, body }, mediaItems)),
-  });
-}
-
-async function deleteNotice(id) {
-  await supabaseRequest(`/notices?id=eq.${encodeURIComponent(id)}`, {
-    method: "DELETE",
-    authToken: getStoredAdminToken(),
-    prefer: "return=minimal",
-  });
-}
-
-async function createStudioNote(number, title, body, mediaItems) {
-  await supabaseRequest("/studio_notes", {
-    method: "POST",
-    authToken: getStoredAdminToken(),
-    prefer: "return=minimal",
-    body: JSON.stringify(contentPayload({ number, title, body }, mediaItems)),
-  });
-}
-
-async function updateStudioNote(id, number, title, body, mediaItems) {
-  await supabaseRequest(`/studio_notes?id=eq.${encodeURIComponent(id)}`, {
-    method: "PATCH",
-    authToken: getStoredAdminToken(),
-    prefer: "return=minimal",
-    body: JSON.stringify(contentPayload({ number, title, body }, mediaItems)),
-  });
-}
-
-async function deleteStudioNote(id) {
-  await supabaseRequest(`/studio_notes?id=eq.${encodeURIComponent(id)}`, {
-    method: "DELETE",
-    authToken: getStoredAdminToken(),
-    prefer: "return=minimal",
-  });
-}
-
-async function createSection(eyebrow, title, layout) {
+async function createSection(eyebrow, title, slug, layout) {
   await supabaseRequest("/content_sections", {
     method: "POST",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ eyebrow, title, layout }),
+    body: JSON.stringify({ eyebrow, title, slug, layout }),
   });
 }
 
-async function updateSection(id, eyebrow, title, layout) {
+async function updateSection(id, eyebrow, title, slug, layout) {
   await supabaseRequest(`/content_sections?id=eq.${encodeURIComponent(id)}`, {
     method: "PATCH",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ eyebrow, title, layout }),
+    body: JSON.stringify({ eyebrow, title, slug, layout }),
   });
 }
 
@@ -245,21 +173,21 @@ async function deleteSection(id) {
   });
 }
 
-async function createCustomEntry(sectionId, number, title, body, mediaItems) {
+async function createCustomEntry(sectionId, number, title, slug, body, mediaItems) {
   await supabaseRequest("/content_entries", {
     method: "POST",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify(contentPayload({ section_id: sectionId, number, title, body }, mediaItems)),
+    body: JSON.stringify(contentPayload({ section_id: sectionId, number, title, slug, body }, mediaItems)),
   });
 }
 
-async function updateCustomEntry(id, sectionId, number, title, body, mediaItems) {
+async function updateCustomEntry(id, sectionId, number, title, slug, body, mediaItems) {
   await supabaseRequest(`/content_entries?id=eq.${encodeURIComponent(id)}`, {
     method: "PATCH",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify(contentPayload({ section_id: sectionId, number, title, body }, mediaItems)),
+    body: JSON.stringify(contentPayload({ section_id: sectionId, number, title, slug, body }, mediaItems)),
   });
 }
 
@@ -271,25 +199,36 @@ async function deleteCustomEntry(id) {
   });
 }
 
+function detailUrlForEntry(entry) {
+  return publicUrl(itemDetailUrl("custom", entry));
+}
+
 async function refreshSectionAdmin() {
   const sections = await fetchCustomSections();
+  const entries = await fetchCustomEntries();
+
   sectionList.innerHTML = sections.length
     ? sections
-        .map((section) => `<article class="section-admin-item">
-          <div>
-            <strong>${section.title}</strong>
-            <span>${section.eyebrow || ""} · ${section.layout === "album" ? "앨범형" : "작문형"}</span>
-          </div>
-          <div class="notice-actions">
-            <button type="button" data-action="edit-section" data-id="${section.id}">수정</button>
-            <button type="button" data-action="delete-section" data-id="${section.id}">삭제</button>
-          </div>
-        </article>`)
+        .map((section) => {
+          const count = entries.filter((entry) => entry.section_id === section.id).length;
+          const sectionUrl = publicUrl(`index.html#${sectionHash(section)}`);
+          return `<article class="section-admin-item">
+            <div>
+              <strong>${escapeHtml(section.title)}</strong>
+              <span>${escapeHtml(section.eyebrow || "작은 글씨 없음")} · ${section.layout === "album" ? "앨범형" : "작문형"} · 글 ${count}개</span>
+              <a href="${sectionUrl}" target="_blank" rel="noreferrer">${sectionUrl}</a>
+            </div>
+            <div class="notice-actions">
+              <button type="button" data-action="edit-section" data-id="${section.id}">수정</button>
+              <button type="button" data-action="delete-section" data-id="${section.id}">삭제</button>
+            </div>
+          </article>`;
+        })
         .join("")
-    : `<article class="section-admin-item"><strong>등록된 섹션이 없습니다.</strong><span>새 섹션을 만들어보세요.</span></article>`;
+    : `<article class="section-admin-item"><strong>등록된 섹션이 없습니다.</strong><span>섹션을 만들면 일반 사이트 상단에 탭이 생깁니다.</span></article>`;
 
   entrySection.innerHTML = sections.length
-    ? sections.map((section) => `<option value="${section.id}">${section.title}</option>`).join("")
+    ? sections.map((section) => `<option value="${section.id}">${escapeHtml(section.title)}</option>`).join("")
     : `<option value="">섹션을 먼저 등록하세요</option>`;
 }
 
@@ -302,7 +241,7 @@ settingsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const settings = Object.keys(defaultSettings).reduce((nextSettings, key) => {
     const field = settingsForm.querySelector(`#${key}`);
-    nextSettings[key] = field.value.trim() || defaultSettings[key];
+    nextSettings[key] = field?.value.trim() || defaultSettings[key];
     return nextSettings;
   }, {});
 
@@ -311,7 +250,7 @@ settingsForm.addEventListener("submit", async (event) => {
     applySettings(settings);
     fillSettingsForm(settings);
   } catch (error) {
-    alert(adminErrorMessage("사이트 문구 저장", error));
+    alert(adminErrorMessage("기본 문구 저장", error));
   }
 });
 
@@ -325,107 +264,25 @@ resetSettings.addEventListener("click", async () => {
   }
 });
 
-adminLogout.addEventListener("click", async () => {
+adminLogout.addEventListener("click", () => {
   clearAdminSession();
   window.location.href = canonicalUrl("index.html");
-});
-
-studioForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const number = studioNoteNumber.value.trim();
-  const title = studioNoteTitle.value.trim();
-  const body = studioNoteBody.value.trim();
-
-  if (!number || !title || !body) return;
-
-  try {
-    submitStudioNote.disabled = true;
-    const existingNote = editingStudioId ? (await fetchStudioNotes()).find((note) => note.id === editingStudioId) : null;
-    const uploadedMedia = await uploadMediaFiles(studioNoteMedia.files, "studio-notes");
-    const mediaItems = [...(existingNote?.mediaItems || []), ...uploadedMedia];
-
-    if (editingStudioId) {
-      await updateStudioNote(editingStudioId, number, title, body, mediaItems);
-    } else {
-      await createStudioNote(number, title, body, mediaItems);
-    }
-
-    resetStudioEditor();
-    await renderStudioNotes({ editable: true });
-  } catch (error) {
-    alert(adminErrorMessage("스튜디오 노트 저장", error));
-  } finally {
-    submitStudioNote.disabled = false;
-  }
-});
-
-cancelStudioEdit.addEventListener("click", resetStudioEditor);
-
-clearStudioNotes.addEventListener("click", async () => {
-  try {
-    const notes = await fetchStudioNotes();
-    await Promise.all(notes.map((note) => deleteStudioNote(note.id)));
-    resetStudioEditor();
-    await renderStudioNotes({ editable: true });
-  } catch (error) {
-    alert(adminErrorMessage("스튜디오 노트 삭제", error));
-  }
-});
-
-postForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const title = postTitle.value.trim();
-  const body = postBody.value.trim();
-
-  if (!title || !body) return;
-
-  try {
-    submitPost.disabled = true;
-    const existingPost = editingId ? (await fetchPosts()).find((post) => post.id === editingId) : null;
-    const uploadedMedia = await uploadMediaFiles(postMedia.files, "notices");
-    const mediaItems = [...(existingPost?.mediaItems || []), ...uploadedMedia];
-
-    if (editingId) {
-      await updateNotice(editingId, title, body, mediaItems);
-    } else {
-      await createNotice(title, body, mediaItems);
-    }
-
-    resetEditor();
-    await renderPosts({ editable: true });
-  } catch (error) {
-    alert(adminErrorMessage("공지 저장", error));
-  } finally {
-    submitPost.disabled = false;
-  }
-});
-
-cancelEdit.addEventListener("click", resetEditor);
-
-clearPosts.addEventListener("click", async () => {
-  try {
-    const posts = await fetchPosts();
-    await Promise.all(posts.map((post) => deleteNotice(post.id)));
-    resetEditor();
-    await renderPosts({ editable: true });
-  } catch (error) {
-    alert(adminErrorMessage("공지 삭제", error));
-  }
 });
 
 sectionForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const eyebrow = sectionEyebrow.value.trim();
   const title = sectionTitle.value.trim();
+  const slug = slugify(sectionSlug.value || title);
   const layout = sectionLayout.value;
   if (!title || !layout) return;
 
   try {
     submitSection.disabled = true;
     if (editingSectionId) {
-      await updateSection(editingSectionId, eyebrow, title, layout);
+      await updateSection(editingSectionId, eyebrow, title, slug, layout);
     } else {
-      await createSection(eyebrow, title, layout);
+      await createSection(eyebrow, title, slug, layout);
     }
 
     resetSectionEditor();
@@ -451,6 +308,7 @@ sectionList.addEventListener("click", async (event) => {
     editingSectionId = id;
     sectionEyebrow.value = section.eyebrow || "";
     sectionTitle.value = section.title;
+    sectionSlug.value = section.slug || "";
     sectionLayout.value = section.layout;
     submitSection.textContent = "수정 저장";
     cancelSectionEdit.classList.remove("hidden");
@@ -473,6 +331,7 @@ customEntryForm.addEventListener("submit", async (event) => {
   const sectionId = entrySection.value;
   const number = entryNumber.value.trim();
   const title = entryTitle.value.trim();
+  const slug = slugify(entrySlug.value || title);
   const body = entryBody.value.trim();
 
   if (!sectionId || !title || !body) return;
@@ -484,80 +343,21 @@ customEntryForm.addEventListener("submit", async (event) => {
     const mediaItems = [...(existingEntry?.mediaItems || existingEntry?.media_items || []), ...uploadedMedia];
 
     if (editingEntryId) {
-      await updateCustomEntry(editingEntryId, sectionId, number, title, body, mediaItems);
+      await updateCustomEntry(editingEntryId, sectionId, number, title, slug, body, mediaItems);
     } else {
-      await createCustomEntry(sectionId, number, title, body, mediaItems);
+      await createCustomEntry(sectionId, number, title, slug, body, mediaItems);
     }
 
     resetEntryEditor();
     await refreshCustomAdminPreview();
   } catch (error) {
-    alert(adminErrorMessage("콘텐츠 저장", error));
+    alert(adminErrorMessage("글 저장", error));
   } finally {
     submitEntry.disabled = false;
   }
 });
 
 cancelEntryEdit.addEventListener("click", resetEntryEditor);
-
-noticeList.addEventListener("click", async (event) => {
-  const button = event.target.closest("button");
-  if (!button) return;
-
-  const id = button.dataset.id;
-
-  if (button.dataset.action === "delete") {
-    try {
-      await deleteNotice(id);
-      if (editingId === id) resetEditor();
-      await renderPosts({ editable: true });
-    } catch (error) {
-      alert(adminErrorMessage("공지 삭제", error));
-    }
-  }
-
-  if (button.dataset.action === "edit") {
-    const post = (await fetchPosts()).find((item) => item.id === id);
-    if (!post) return;
-
-    editingId = id;
-    postTitle.value = post.title;
-    postBody.value = post.body;
-    submitPost.textContent = "수정 저장";
-    cancelEdit.classList.remove("hidden");
-    postForm.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-});
-
-studioGrid.addEventListener("click", async (event) => {
-  const button = event.target.closest("button");
-  if (!button) return;
-
-  const id = button.dataset.id;
-
-  if (button.dataset.action === "delete-studio") {
-    try {
-      await deleteStudioNote(id);
-      if (editingStudioId === id) resetStudioEditor();
-      await renderStudioNotes({ editable: true });
-    } catch (error) {
-      alert(adminErrorMessage("스튜디오 노트 삭제", error));
-    }
-  }
-
-  if (button.dataset.action === "edit-studio") {
-    const note = (await fetchStudioNotes()).find((item) => item.id === id);
-    if (!note) return;
-
-    editingStudioId = id;
-    studioNoteNumber.value = note.number;
-    studioNoteTitle.value = note.title;
-    studioNoteBody.value = note.body;
-    submitStudioNote.textContent = "수정 저장";
-    cancelStudioEdit.classList.remove("hidden");
-    studioForm.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-});
 
 customSections.addEventListener("click", async (event) => {
   const button = event.target.closest("button");
@@ -571,7 +371,7 @@ customSections.addEventListener("click", async (event) => {
       if (editingEntryId === id) resetEntryEditor();
       await refreshCustomAdminPreview();
     } catch (error) {
-      alert(adminErrorMessage("콘텐츠 삭제", error));
+      alert(adminErrorMessage("글 삭제", error));
     }
   }
 
@@ -583,6 +383,7 @@ customSections.addEventListener("click", async (event) => {
     entrySection.value = entry.section_id;
     entryNumber.value = entry.number || "";
     entryTitle.value = entry.title;
+    entrySlug.value = entry.slug || "";
     entryBody.value = entry.body;
     submitEntry.textContent = "수정 저장";
     cancelEntryEdit.classList.remove("hidden");
@@ -597,11 +398,8 @@ async function initAdmin() {
   const settings = await fetchSiteSettings();
   fillSettingsForm(settings);
   applySettings(settings);
-  resetStudioEditor();
   resetSectionEditor();
   resetEntryEditor();
-  await renderPosts({ editable: true });
-  await renderStudioNotes({ editable: true });
   await refreshCustomAdminPreview();
 }
 

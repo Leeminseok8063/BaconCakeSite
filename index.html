@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BaconCakeOfficial.com</title>
-    <link rel="stylesheet" href="styles.css?v=20260621-4" />
+    <link rel="stylesheet" href="styles.css?v=20260621-5" />
   </head>
   <body>
     <div class="site-shell">
@@ -13,11 +13,7 @@
           <img src="assets/team-icon.png" alt="BaconCake 로고" />
           <span data-setting="brandName">BaconCakeOfficial.com</span>
         </a>
-        <nav class="main-nav" aria-label="주요 메뉴">
-          <a href="#news" data-setting="noticeNavLabel">공지사항</a>
-          <a href="#studio">스튜디오</a>
-          <a href="privacy.html" data-setting="privacyNavLabel">개인정보 처리방침</a>
-        </nav>
+        <nav class="main-nav" id="sectionNav" aria-label="섹션 메뉴"></nav>
         <button class="root-button" id="adminOpen" type="button">ADMIN</button>
       </header>
 
@@ -30,27 +26,8 @@
               BaconCake는 작고 선명한 아이디어를 게임, 웹, 커뮤니티 경험으로 만드는
               개발사입니다.
             </p>
-            <div class="hero-actions">
-              <a class="primary-action" href="#news" data-setting="primaryCta">공지사항 보기</a>
-              <a class="secondary-action" href="#studio" data-i18n="studioIntroCta">스튜디오 소개</a>
-            </div>
+            <div class="hero-actions" id="heroActions"></div>
           </div>
-        </section>
-
-        <section class="section-grid" id="news">
-          <div class="section-heading">
-            <p class="eyebrow" data-setting="noticeEyebrow">Official Board</p>
-            <h2 data-setting="noticeTitle">공지사항</h2>
-          </div>
-          <div class="notice-list" id="noticeList" aria-live="polite"></div>
-        </section>
-
-        <section class="studio-section" id="studio">
-          <div class="section-heading">
-            <p class="eyebrow" data-setting="studioEyebrow">Studio Notes</p>
-            <h2 data-setting="studioTitle">무엇을 만드는가</h2>
-          </div>
-          <div class="studio-grid" id="studioGrid"></div>
         </section>
 
         <div id="customSections"></div>
@@ -69,7 +46,7 @@
       </form>
     </dialog>
 
-    <script src="supabase-config.js?v=20260621-4"></script>
-    <script src="site.js?v=20260621-4"></script>
+    <script src="supabase-config.js?v=20260621-5"></script>
+    <script src="site.js?v=20260621-5"></script>
   </body>
 </html>

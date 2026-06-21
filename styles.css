@@ -260,6 +260,10 @@ a {
   font-weight: 800;
 }
 
+.section-admin-item a {
+  overflow-wrap: anywhere;
+}
+
 .panel-title span {
   color: var(--red-dark);
   font-weight: 900;
@@ -267,9 +271,16 @@ a {
 
 .panel-title button,
 .notice-actions button,
+.notice-actions a,
 #cancelEdit {
   background: rgba(51, 17, 9, 0.1);
+  border: 0;
+  border-radius: 8px;
   color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  padding: 8px 10px;
 }
 
 .admin-panel label {

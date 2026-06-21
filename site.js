@@ -114,134 +114,14 @@ const defaultSettings = {
   heroEyebrow: "BaconCake Studio · Official",
   heroTitle: "BaconCake",
   heroDescription: "BaconCake는 작고 선명한 아이디어를 게임, 웹, 커뮤니티 경험으로 만드는 개발사입니다.",
-  primaryCta: "공지사항 보기",
-  noticeEyebrow: "Official Board",
-  noticeTitle: "공지사항",
-  noticeNavLabel: "공지사항",
-  studioEyebrow: "Studio Notes",
-  studioTitle: "무엇을 만드는가",
-  privacyNavLabel: "개인정보 처리방침",
-  privacyTitle: "개인정보 처리방침",
-  privacyBody: `BaconCake은 이용자의 개인정보를 중요하게 생각합니다.
-본 개인정보 처리방침은 One More Bite 앱에 적용됩니다.
-
-시행일자: 2026년 6월 21일
-
-1. 개인정보의 처리 목적
-
-BaconCake은 다음 목적을 위해 개인정보를 처리할 수 있습니다.
-
-서비스 제공 및 운영
-랭킹과 점수 표시
-광고 제공
-광고제거 인앱결제 확인
-앱 오류 확인 및 서비스 개선
-부정 이용 방지
-스토어 정책 및 관련 법령 준수
-
-2. 수집 또는 처리될 수 있는 정보
-
-앱 이용 과정에서 다음 정보가 처리될 수 있습니다.
-
-기기 정보
-운영체제 정보
-앱 버전
-국가 또는 지역 정보
-IP 주소
-광고 식별자
-앱 이용 기록
-광고 노출 및 클릭 기록
-오류 및 충돌 정보
-랭킹 점수
-순위 정보
-닉네임 또는 표시 이름
-구매 상품 정보
-구매 상태
-구매 영수증 또는 구매 토큰
-
-BaconCake은 결제 카드번호, 계좌번호 등 결제수단 정보를 직접 수집하지 않습니다.
-결제는 Google Play 또는 Apple App Store를 통해 처리됩니다.
-
-3. 개인정보의 보유 기간
-
-BaconCake은 개인정보를 수집 목적에 필요한 기간 동안 보관합니다.
-
-랭킹 정보는 서비스 제공 기간 동안 보관될 수 있습니다.
-구매 정보는 광고제거 상품 제공과 구매 복원을 위해 필요한 기간 동안 보관될 수 있습니다.
-오류 및 이용 기록은 앱 개선과 부정 이용 방지를 위해 필요한 기간 동안 보관될 수 있습니다.
-
-이용자가 삭제를 요청하는 경우 관련 법령상 보관이 필요한 정보를 제외하고 지체 없이 삭제합니다.
-
-4. 광고 제공
-
-One More Bite는 Google AdMob을 사용하여 광고를 표시할 수 있습니다.
-Google AdMob은 광고 제공, 광고 성과 측정, 부정 광고 방지를 위해 광고 식별자, 기기 정보, IP 주소, 앱 이용 정보 등을 처리할 수 있습니다.
-
-이용자는 기기 설정에서 맞춤형 광고를 제한하거나 광고 식별자를 재설정할 수 있습니다.
-
-5. 인앱결제
-
-One More Bite는 광고제거를 위한 유료 인앱결제 상품을 제공할 수 있습니다.
-구매가 완료되면 앱은 구매 상태를 확인하여 광고제거 기능을 제공합니다.
-결제 처리는 Google Play 또는 Apple App Store에서 진행됩니다.
-
-6. 랭킹 정보
-
-One More Bite는 이용자의 점수와 순위를 랭킹에 표시할 수 있습니다.
-랭킹에는 닉네임 또는 표시 이름, 점수, 순위가 표시될 수 있습니다.
-
-이용자는 랭킹 정보 삭제를 요청할 수 있습니다.
-
-7. 제3자 서비스
-
-앱 운영을 위해 다음 외부 서비스를 사용할 수 있습니다.
-
-Google AdMob
-Google Play 결제
-Apple 인앱결제
-Unity Gaming Services 또는 랭킹 서비스 제공자
-
-각 서비스는 광고 제공, 결제 처리, 구매 확인, 랭킹 제공, 앱 안정성 개선을 위해 필요한 정보를 처리할 수 있습니다.
-
-8. 아동의 개인정보
-
-One More Bite는 만 14세 미만 아동을 주요 대상으로 하지 않습니다.
-만 14세 미만 아동의 개인정보 처리가 필요한 경우 관련 법령에 따라 필요한 조치를 취합니다.
-
-9. 개인정보의 삭제 요청
-
-이용자는 개인정보 열람, 수정, 삭제, 처리 정지를 요청할 수 있습니다.
-랭킹 정보 삭제도 요청할 수 있습니다.
-
-문의 이메일: [문의 이메일]
-
-10. 개인정보 보호책임자
-
-개인정보 보호책임자: BaconCake
-문의 이메일: [문의 이메일]
-
-11. 개인정보 처리방침 변경
-
-본 개인정보 처리방침은 앱 기능, 법령, 스토어 정책 변경에 따라 수정될 수 있습니다.
-변경 사항은 앱 또는 스토어 페이지를 통해 안내할 수 있습니다.
-
-최종 수정일: 2026년 6월 21일`,
 };
 
 const translatedDefaultSettings = {
   en: {
     heroDescription: "BaconCake turns small, clear ideas into games, web experiences, and community tools.",
-    primaryCta: "View Notices",
-    noticeTitle: "Notices",
-    noticeNavLabel: "Notices",
-    studioTitle: "What We Make",
   },
   ja: {
     heroDescription: "BaconCakeは小さく明確なアイデアをゲーム、Web、コミュニティ体験にします。",
-    primaryCta: "お知らせを見る",
-    noticeTitle: "お知らせ",
-    noticeNavLabel: "お知らせ",
-    studioTitle: "つくるもの",
   },
 };
 
@@ -413,9 +293,13 @@ async function fetchCustomSections() {
   if (!window.BACONCAKE_SUPABASE) return [];
 
   try {
-    return await supabaseRequest("/content_sections?select=id,eyebrow,title,layout,created_at&order=created_at.asc");
+    return await supabaseRequest("/content_sections?select=id,eyebrow,title,slug,layout,created_at&order=created_at.asc");
   } catch {
-    return [];
+    try {
+      return await supabaseRequest("/content_sections?select=id,eyebrow,title,layout,created_at&order=created_at.asc");
+    } catch {
+      return [];
+    }
   }
 }
 
@@ -424,7 +308,7 @@ async function fetchCustomEntries(sectionId) {
 
   const sectionFilter = sectionId ? `&section_id=eq.${encodeURIComponent(sectionId)}` : "";
   try {
-    const data = await supabaseRequest(`/content_entries?select=id,section_id,number,title,body,media_items,created_at${sectionFilter}&order=created_at.desc`);
+    const data = await supabaseRequest(`/content_entries?select=id,section_id,number,title,slug,body,media_items,created_at${sectionFilter}&order=created_at.desc`);
     return data.map((entry) => ({
       ...entry,
       mediaItems: entry.media_items || [],
@@ -446,7 +330,7 @@ async function fetchCustomEntries(sectionId) {
 
 async function fetchCustomEntry(id) {
   const entries = await fetchCustomEntries();
-  return entries.find((entry) => entry.id === id);
+  return entries.find((entry) => entry.id === id || entry.slug === id);
 }
 
 function savePosts(posts) {
@@ -549,8 +433,10 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
-function itemDetailUrl(type, id) {
-  return `detail.html?type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}`;
+function itemDetailUrl(type, itemOrId) {
+  const id = typeof itemOrId === "object" ? itemOrId.slug || itemOrId.id : itemOrId;
+  const key = typeof itemOrId === "object" && itemOrId.slug ? "slug" : "id";
+  return `detail.html?type=${encodeURIComponent(type)}&${key}=${encodeURIComponent(id)}`;
 }
 
 function escapeHtml(value) {
@@ -601,7 +487,7 @@ function renderArticleCard(item, { editable = false, actions = "", detailType = 
   </article>`;
 
   if (editable) return content;
-  return `<a class="card-link" href="${itemDetailUrl(detailType, item.id)}">${content}</a>`;
+  return `<a class="card-link" href="${itemDetailUrl(detailType, item)}">${content}</a>`;
 }
 
 function renderAlbumCard(item, { editable = false, actions = "", detailType = "custom" } = {}) {
@@ -616,7 +502,7 @@ function renderAlbumCard(item, { editable = false, actions = "", detailType = "c
   </article>`;
 
   if (editable) return content;
-  return `<a class="card-link" href="${itemDetailUrl(detailType, item.id)}">${content}</a>`;
+  return `<a class="card-link" href="${itemDetailUrl(detailType, item)}">${content}</a>`;
 }
 
 function applySettings(settings = loadSettings()) {
@@ -641,6 +527,33 @@ function renderPrivacyPolicy(settings = loadSettings()) {
 
   privacyTitle.textContent = settings.privacyTitle || defaultSettings.privacyTitle;
   privacyBody.textContent = settings.privacyBody || defaultSettings.privacyBody;
+}
+
+function sectionHash(section) {
+  return `section-${section.slug || section.id}`;
+}
+
+function sectionHref(section) {
+  const hash = sectionHash(section);
+  const page = window.location.pathname.split("/").pop() || "index.html";
+  return page === "index.html" ? `#${hash}` : `index.html#${hash}`;
+}
+
+async function renderSectionNav(sections = null) {
+  const nav = document.querySelector("#sectionNav");
+  if (!nav) return;
+
+  const items = sections || await fetchCustomSections();
+  nav.innerHTML = items.length
+    ? items.map((section) => `<a href="${sectionHref(section)}">${escapeHtml(section.title)}</a>`).join("")
+    : `<span class="empty-nav">섹션 없음</span>`;
+
+  const heroActions = document.querySelector("#heroActions");
+  if (!heroActions) return;
+
+  heroActions.innerHTML = items.length
+    ? `<a class="primary-action" href="#${sectionHash(items[0])}">첫 섹션 보기</a>`
+    : "";
 }
 
 async function renderPosts({ editable = false } = {}) {
@@ -716,8 +629,19 @@ async function renderCustomSections({ editable = false } = {}) {
   if (!customSections) return;
 
   const sections = await fetchCustomSections();
+  await renderSectionNav(sections);
+
   if (!sections.length) {
-    customSections.innerHTML = "";
+    customSections.innerHTML = `<section class="section-grid empty-site">
+      <div class="section-heading">
+        <p class="eyebrow">Empty Site</p>
+        <h2>등록된 섹션이 없습니다.</h2>
+      </div>
+      <article class="notice-card">
+        <h3>어드민 콘솔에서 섹션을 추가하세요.</h3>
+        <p>섹션을 만들면 상단 탭이 자동으로 생기고, 섹션 안의 글은 상세 HTML 페이지처럼 열립니다.</p>
+      </article>
+    </section>`;
     return;
   }
 
@@ -731,6 +655,7 @@ async function renderCustomSections({ editable = false } = {}) {
             .map((entry) => {
               const actions = editable
                 ? `<div class="notice-actions">
+                    <a href="${itemDetailUrl("custom", entry)}" target="_blank" rel="noreferrer">상세페이지</a>
                     <button type="button" data-action="edit-entry" data-id="${entry.id}">${t("edit")}</button>
                     <button type="button" data-action="delete-entry" data-id="${entry.id}">${t("delete")}</button>
                   </div>`
@@ -743,7 +668,7 @@ async function renderCustomSections({ editable = false } = {}) {
             .join("")
         : `<article class="notice-card"><h3>등록된 콘텐츠가 없습니다.</h3><p>관리자 콘솔에서 콘텐츠를 추가하세요.</p></article>`;
 
-      return `<section class="${layoutClass}" id="section-${section.id}">
+      return `<section class="${layoutClass}" id="${sectionHash(section)}">
         <div class="section-heading">
           <p class="eyebrow">${escapeHtml(section.eyebrow || "")}</p>
           <h2>${escapeHtml(section.title)}</h2>
@@ -813,8 +738,7 @@ async function refreshTranslatedContent() {
   const settings = await fetchSiteSettings();
   applySettings(settings);
   applyStaticTranslations();
-  await renderPosts({ editable: document.body.classList.contains("admin-page") });
-  await renderStudioNotes({ editable: document.body.classList.contains("admin-page") });
+  await renderSectionNav();
   await renderCustomSections({ editable: document.body.classList.contains("admin-page") });
 
   if (typeof renderDetail === "function") {
@@ -854,14 +778,13 @@ function setupLanguageSwitcher() {
 async function initSite() {
   applySettings();
   applyStaticTranslations();
-  renderPosts();
-  renderStudioNotes();
   renderCustomSections();
   setupAdminLogin();
   setupLanguageSwitcher();
 
   const settings = await fetchSiteSettings();
   applySettings(settings);
+  await renderSectionNav();
 }
 
 initSite();
