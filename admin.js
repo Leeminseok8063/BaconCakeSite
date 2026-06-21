@@ -55,18 +55,35 @@ function resetStudioEditor() {
 }
 
 function safeFileName(name) {
-  return name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  return name.replace(/[^a-zA-Z0-9._-]/g, "-") || "file";
+}
+
+function storageBaseUrl() {
+  if (BACONCAKE_SUPABASE.storageUrl) return BACONCAKE_SUPABASE.storageUrl;
+  return BACONCAKE_SUPABASE.restUrl.replace("/rest/v1", "/storage/v1");
+}
+
+function encodeStoragePath(path) {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
+function contentPayload(fields, mediaItems) {
+  const payload = { ...fields };
+  if (mediaItems.length) payload.media_items = mediaItems;
+  return payload;
 }
 
 async function uploadMediaFiles(files, folder) {
   const token = getStoredAdminToken();
   const uploads = [...files];
   if (!uploads.length) return [];
+  if (!token) throw new Error("관리자 로그인 세션이 없습니다. 다시 로그인해주세요.");
 
   return Promise.all(
     uploads.map(async (file) => {
       const path = `${folder}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
-      const response = await fetch(`${BACONCAKE_SUPABASE.storageUrl}/object/content-media/${path}`, {
+      const encodedPath = encodeStoragePath(path);
+      const response = await fetch(`${storageBaseUrl()}/object/content-media/${encodedPath}`, {
         method: "POST",
         headers: {
           apikey: BACONCAKE_SUPABASE.anonKey,
@@ -85,7 +102,7 @@ async function uploadMediaFiles(files, folder) {
       return {
         name: file.name,
         type: file.type || "application/octet-stream",
-        url: `${BACONCAKE_SUPABASE.storageUrl}/object/public/content-media/${path}`,
+        url: `${storageBaseUrl()}/object/public/content-media/${encodedPath}`,
       };
     }),
   );
@@ -96,7 +113,7 @@ async function createNotice(title, body, mediaItems) {
     method: "POST",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ title, body, media_items: mediaItems }),
+    body: JSON.stringify(contentPayload({ title, body }, mediaItems)),
   });
 }
 
@@ -105,7 +122,7 @@ async function updateNotice(id, title, body, mediaItems) {
     method: "PATCH",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ title, body, media_items: mediaItems }),
+    body: JSON.stringify(contentPayload({ title, body }, mediaItems)),
   });
 }
 
@@ -122,7 +139,7 @@ async function createStudioNote(number, title, body, mediaItems) {
     method: "POST",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ number, title, body, media_items: mediaItems }),
+    body: JSON.stringify(contentPayload({ number, title, body }, mediaItems)),
   });
 }
 
@@ -131,7 +148,7 @@ async function updateStudioNote(id, number, title, body, mediaItems) {
     method: "PATCH",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ number, title, body, media_items: mediaItems }),
+    body: JSON.stringify(contentPayload({ number, title, body }, mediaItems)),
   });
 }
 
