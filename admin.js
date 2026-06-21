@@ -3,11 +3,13 @@ const studioForm = document.querySelector("#studioForm");
 const studioNoteNumber = document.querySelector("#studioNoteNumber");
 const studioNoteTitle = document.querySelector("#studioNoteTitle");
 const studioNoteBody = document.querySelector("#studioNoteBody");
+const studioNoteMedia = document.querySelector("#studioNoteMedia");
 const submitStudioNote = document.querySelector("#submitStudioNote");
 const cancelStudioEdit = document.querySelector("#cancelStudioEdit");
 const postForm = document.querySelector("#postForm");
 const postTitle = document.querySelector("#postTitle");
 const postBody = document.querySelector("#postBody");
+const postMedia = document.querySelector("#postMedia");
 const submitPost = document.querySelector("#submitPost");
 const cancelEdit = document.querySelector("#cancelEdit");
 const clearPosts = document.querySelector("#clearPosts");
@@ -52,21 +54,58 @@ function resetStudioEditor() {
   cancelStudioEdit.classList.add("hidden");
 }
 
-async function createNotice(title, body) {
+function safeFileName(name) {
+  return name.replace(/[^a-zA-Z0-9._-]/g, "-");
+}
+
+async function uploadMediaFiles(files, folder) {
+  const token = getStoredAdminToken();
+  const uploads = [...files];
+  if (!uploads.length) return [];
+
+  return Promise.all(
+    uploads.map(async (file) => {
+      const path = `${folder}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+      const response = await fetch(`${BACONCAKE_SUPABASE.storageUrl}/object/content-media/${path}`, {
+        method: "POST",
+        headers: {
+          apikey: BACONCAKE_SUPABASE.anonKey,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": file.type || "application/octet-stream",
+          "x-upsert": "false",
+        },
+        body: file,
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || `파일 업로드 실패: ${file.name}`);
+      }
+
+      return {
+        name: file.name,
+        type: file.type || "application/octet-stream",
+        url: `${BACONCAKE_SUPABASE.storageUrl}/object/public/content-media/${path}`,
+      };
+    }),
+  );
+}
+
+async function createNotice(title, body, mediaItems) {
   await supabaseRequest("/notices", {
     method: "POST",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ title, body }),
+    body: JSON.stringify({ title, body, media_items: mediaItems }),
   });
 }
 
-async function updateNotice(id, title, body) {
+async function updateNotice(id, title, body, mediaItems) {
   await supabaseRequest(`/notices?id=eq.${encodeURIComponent(id)}`, {
     method: "PATCH",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ title, body }),
+    body: JSON.stringify({ title, body, media_items: mediaItems }),
   });
 }
 
@@ -78,21 +117,21 @@ async function deleteNotice(id) {
   });
 }
 
-async function createStudioNote(number, title, body) {
+async function createStudioNote(number, title, body, mediaItems) {
   await supabaseRequest("/studio_notes", {
     method: "POST",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ number, title, body }),
+    body: JSON.stringify({ number, title, body, media_items: mediaItems }),
   });
 }
 
-async function updateStudioNote(id, number, title, body) {
+async function updateStudioNote(id, number, title, body, mediaItems) {
   await supabaseRequest(`/studio_notes?id=eq.${encodeURIComponent(id)}`, {
     method: "PATCH",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ number, title, body }),
+    body: JSON.stringify({ number, title, body, media_items: mediaItems }),
   });
 }
 
@@ -138,10 +177,14 @@ studioForm.addEventListener("submit", async (event) => {
 
   try {
     submitStudioNote.disabled = true;
+    const existingNote = editingStudioId ? (await fetchStudioNotes()).find((note) => note.id === editingStudioId) : null;
+    const uploadedMedia = await uploadMediaFiles(studioNoteMedia.files, "studio-notes");
+    const mediaItems = [...(existingNote?.mediaItems || []), ...uploadedMedia];
+
     if (editingStudioId) {
-      await updateStudioNote(editingStudioId, number, title, body);
+      await updateStudioNote(editingStudioId, number, title, body, mediaItems);
     } else {
-      await createStudioNote(number, title, body);
+      await createStudioNote(number, title, body, mediaItems);
     }
 
     resetStudioEditor();
@@ -175,10 +218,14 @@ postForm.addEventListener("submit", async (event) => {
 
   try {
     submitPost.disabled = true;
+    const existingPost = editingId ? (await fetchPosts()).find((post) => post.id === editingId) : null;
+    const uploadedMedia = await uploadMediaFiles(postMedia.files, "notices");
+    const mediaItems = [...(existingPost?.mediaItems || []), ...uploadedMedia];
+
     if (editingId) {
-      await updateNotice(editingId, title, body);
+      await updateNotice(editingId, title, body, mediaItems);
     } else {
-      await createNotice(title, body);
+      await createNotice(title, body, mediaItems);
     }
 
     resetEditor();

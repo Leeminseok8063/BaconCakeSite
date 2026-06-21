@@ -12,6 +12,50 @@
 
 공지사항과 스튜디오 노트는 Supabase 데이터베이스에 저장됩니다. 관리자 작성, 수정, 삭제는 Supabase Auth 로그인 세션이 있어야 가능합니다.
 
+긴 글 작성 제한은 없으며, 공지사항과 스튜디오 노트에는 이미지, 동영상, 오디오, PDF 첨부가 가능합니다.
+
+첨부 파일 기능을 쓰려면 Supabase SQL Editor에서 아래 SQL을 한 번 실행해야 합니다.
+
+```sql
+alter table public.notices
+add column if not exists media_items jsonb not null default '[]'::jsonb;
+
+alter table public.studio_notes
+add column if not exists media_items jsonb not null default '[]'::jsonb;
+
+insert into storage.buckets (id, name, public)
+values ('content-media', 'content-media', true)
+on conflict (id) do update set public = true;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage'
+      and tablename = 'objects'
+      and policyname = 'Anyone can read content media'
+  ) then
+    create policy "Anyone can read content media"
+    on storage.objects
+    for select
+    using (bucket_id = 'content-media');
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage'
+      and tablename = 'objects'
+      and policyname = 'Authenticated users can upload content media'
+  ) then
+    create policy "Authenticated users can upload content media"
+    on storage.objects
+    for insert
+    to authenticated
+    with check (bucket_id = 'content-media');
+  end if;
+end $$;
+```
+
 ## GitHub Pages
 
 이 프로젝트는 정적 사이트라 GitHub Pages에 바로 배포할 수 있습니다.

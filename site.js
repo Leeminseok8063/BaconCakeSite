@@ -250,12 +250,19 @@ async function fetchAdminUser() {
 async function fetchPosts() {
   if (!window.BACONCAKE_SUPABASE) return loadPosts();
 
-  const data = await supabaseRequest("/notices?select=id,title,body,created_at&order=created_at.desc");
+  let data;
+  try {
+    data = await supabaseRequest("/notices?select=id,title,body,created_at,media_items&order=created_at.desc");
+  } catch (error) {
+    data = await supabaseRequest("/notices?select=id,title,body,created_at&order=created_at.desc");
+  }
+
   return data.map((post) => ({
     id: post.id,
     title: post.title,
     body: post.body,
     createdAt: post.created_at,
+    mediaItems: post.media_items || [],
   }));
 }
 
@@ -287,13 +294,20 @@ function loadStudioNotes() {
 async function fetchStudioNotes() {
   if (!window.BACONCAKE_SUPABASE) return loadStudioNotes();
 
-  const data = await supabaseRequest("/studio_notes?select=id,number,title,body,created_at&order=created_at.asc");
+  let data;
+  try {
+    data = await supabaseRequest("/studio_notes?select=id,number,title,body,created_at,media_items&order=created_at.asc");
+  } catch (error) {
+    data = await supabaseRequest("/studio_notes?select=id,number,title,body,created_at&order=created_at.asc");
+  }
+
   return data.map((note) => ({
     id: note.id,
     number: note.number,
     title: note.title,
     body: note.body,
     createdAt: note.created_at,
+    mediaItems: note.media_items || [],
   }));
 }
 
@@ -335,6 +349,34 @@ function escapeHtml(value) {
   const div = document.createElement("div");
   div.textContent = value;
   return div.innerHTML;
+}
+
+function renderMediaItems(mediaItems = []) {
+  if (!mediaItems.length) return "";
+
+  return `<div class="media-list">
+    ${mediaItems
+      .map((item) => {
+        const url = escapeHtml(item.url);
+        const name = escapeHtml(item.name || "첨부 파일");
+        const type = item.type || "";
+
+        if (type.startsWith("image/")) {
+          return `<figure class="media-item"><img src="${url}" alt="${name}" loading="lazy" /><figcaption>${name}</figcaption></figure>`;
+        }
+
+        if (type.startsWith("video/")) {
+          return `<figure class="media-item"><video src="${url}" controls preload="metadata"></video><figcaption>${name}</figcaption></figure>`;
+        }
+
+        if (type.startsWith("audio/")) {
+          return `<figure class="media-item"><audio src="${url}" controls></audio><figcaption>${name}</figcaption></figure>`;
+        }
+
+        return `<a class="media-download" href="${url}" target="_blank" rel="noreferrer">${name}</a>`;
+      })
+      .join("")}
+  </div>`;
 }
 
 function applySettings() {
@@ -390,6 +432,7 @@ async function renderPosts({ editable = false } = {}) {
           ${actions}
         </header>
         <p>${escapeHtml(post.body)}</p>
+        ${renderMediaItems(post.mediaItems)}
       </article>`;
 
       if (editable) return content;
@@ -433,6 +476,7 @@ async function renderStudioNotes({ editable = false } = {}) {
         </header>
         <h3>${escapeHtml(note.title)}</h3>
         <p>${escapeHtml(note.body)}</p>
+        ${renderMediaItems(note.mediaItems)}
       </article>`;
 
       if (editable) return content;

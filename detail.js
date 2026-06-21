@@ -40,6 +40,7 @@ async function renderDetail() {
     <div class="detail-meta">${meta}</div>
     <h1>${escapeHtml(item.title)}</h1>
     <p>${escapeHtml(item.body)}</p>
+    ${renderMediaItems(item.mediaItems)}
     <a class="secondary-action" href="${backHref}">${t("listBack")}</a>
   </article>`;
 }

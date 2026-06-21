@@ -404,6 +404,46 @@ a {
   white-space: nowrap;
 }
 
+.media-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.media-item {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.media-item img,
+.media-item video {
+  background: rgba(51, 17, 9, 0.08);
+  border-radius: 8px;
+  max-height: 520px;
+  object-fit: contain;
+  width: 100%;
+}
+
+.media-item audio {
+  width: 100%;
+}
+
+.media-item figcaption,
+.media-download,
+.admin-panel small {
+  color: var(--red-dark);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.media-download {
+  background: rgba(51, 17, 9, 0.08);
+  border-radius: 8px;
+  display: inline-block;
+  padding: 10px 12px;
+}
+
 .studio-grid,
 .settings-grid {
   grid-template-columns: repeat(3, 1fr);

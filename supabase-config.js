@@ -5,4 +5,5 @@ window.BACONCAKE_SUPABASE = {
   anonKey: SUPABASE_ANON_KEY,
   authUrl: `${SUPABASE_URL}/auth/v1`,
   restUrl: `${SUPABASE_URL}/rest/v1`,
+  storageUrl: `${SUPABASE_URL}/storage/v1`,
 };
