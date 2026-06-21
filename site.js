@@ -3,6 +3,91 @@ const SETTINGS_KEY = "bacon-cake-settings";
 const STUDIO_NOTES_KEY = "bacon-cake-studio-notes";
 const ADMIN_TOKEN_KEY = "bacon-cake-supabase-token";
 const ADMIN_REFRESH_KEY = "bacon-cake-supabase-refresh";
+const LANGUAGE_KEY = "bacon-cake-language";
+
+const translations = {
+  ko: {
+    adminAccessTitle: "Admin Access",
+    adminAccessBody: "관리자 계정으로 로그인하면 편집 화면으로 이동합니다.",
+    adminEmailPlaceholder: "이메일",
+    adminPasswordPlaceholder: "비밀번호",
+    adminMove: "관리자 이동",
+    adminLoginProgress: "로그인 중입니다...",
+    adminLoginFailure: "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.",
+    studioIntroCta: "스튜디오 소개",
+    loadingTitle: "불러오는 중입니다.",
+    loadingBody: "잠시만 기다려주세요.",
+    noticeLoadFailure: "공지사항을 불러오지 못했습니다.",
+    studioLoadFailure: "스튜디오 노트를 불러오지 못했습니다.",
+    emptyNoticeTitle: "등록된 공지가 없습니다.",
+    emptyNoticeBody: "새 소식이 등록되면 이곳에 표시됩니다.",
+    emptyStudioTitle: "등록된 스튜디오 노트가 없습니다.",
+    emptyStudioBody: "새 노트가 등록되면 이곳에 표시됩니다.",
+    edit: "수정",
+    delete: "삭제",
+    noticeLabel: "공지사항",
+    studioLabel: "스튜디오 노트",
+    notFoundLabel: "Not Found",
+    notFoundTitle: "내용을 찾을 수 없습니다.",
+    notFoundBody: "삭제되었거나 잘못된 주소일 수 있습니다.",
+    homeBack: "홈으로 돌아가기",
+    listBack: "목록으로 돌아가기",
+  },
+  en: {
+    adminAccessTitle: "Admin Access",
+    adminAccessBody: "Sign in with an admin account to open the editor.",
+    adminEmailPlaceholder: "Email",
+    adminPasswordPlaceholder: "Password",
+    adminMove: "Open admin",
+    adminLoginProgress: "Signing in...",
+    adminLoginFailure: "Sign-in failed. Check your email and password.",
+    studioIntroCta: "Studio Intro",
+    loadingTitle: "Loading.",
+    loadingBody: "Please wait a moment.",
+    noticeLoadFailure: "Could not load notices.",
+    studioLoadFailure: "Could not load studio notes.",
+    emptyNoticeTitle: "No notices yet.",
+    emptyNoticeBody: "New updates will appear here.",
+    emptyStudioTitle: "No studio notes yet.",
+    emptyStudioBody: "New notes will appear here.",
+    edit: "Edit",
+    delete: "Delete",
+    noticeLabel: "Notice",
+    studioLabel: "Studio Note",
+    notFoundLabel: "Not Found",
+    notFoundTitle: "Content not found.",
+    notFoundBody: "It may have been deleted or the link may be incorrect.",
+    homeBack: "Back home",
+    listBack: "Back to list",
+  },
+  ja: {
+    adminAccessTitle: "Admin Access",
+    adminAccessBody: "管理者アカウントでログインすると編集画面に移動します。",
+    adminEmailPlaceholder: "メール",
+    adminPasswordPlaceholder: "パスワード",
+    adminMove: "管理画面へ",
+    adminLoginProgress: "ログイン中です...",
+    adminLoginFailure: "ログインに失敗しました。メールとパスワードを確認してください。",
+    studioIntroCta: "スタジオ紹介",
+    loadingTitle: "読み込み中です。",
+    loadingBody: "少々お待ちください。",
+    noticeLoadFailure: "お知らせを読み込めませんでした。",
+    studioLoadFailure: "スタジオノートを読み込めませんでした。",
+    emptyNoticeTitle: "登録されたお知らせはありません。",
+    emptyNoticeBody: "新しいお知らせが登録されるとここに表示されます。",
+    emptyStudioTitle: "登録されたスタジオノートはありません。",
+    emptyStudioBody: "新しいノートが登録されるとここに表示されます。",
+    edit: "編集",
+    delete: "削除",
+    noticeLabel: "お知らせ",
+    studioLabel: "スタジオノート",
+    notFoundLabel: "Not Found",
+    notFoundTitle: "内容が見つかりません。",
+    notFoundBody: "削除されたか、リンクが正しくない可能性があります。",
+    homeBack: "ホームへ戻る",
+    listBack: "一覧へ戻る",
+  },
+};
 
 const defaultSettings = {
   brandName: "BaconCakeOfficial.com",
@@ -16,6 +101,23 @@ const defaultSettings = {
   noticeNavLabel: "공지사항",
   studioEyebrow: "Studio Notes",
   studioTitle: "무엇을 만드는가",
+};
+
+const translatedDefaultSettings = {
+  en: {
+    heroDescription: "BaconCake turns small, clear ideas into games, web experiences, and community tools.",
+    primaryCta: "View Notices",
+    noticeTitle: "Notices",
+    noticeNavLabel: "Notices",
+    studioTitle: "What We Make",
+  },
+  ja: {
+    heroDescription: "BaconCakeは小さく明確なアイデアをゲーム、Web、コミュニティ体験にします。",
+    primaryCta: "お知らせを見る",
+    noticeTitle: "お知らせ",
+    noticeNavLabel: "お知らせ",
+    studioTitle: "つくるもの",
+  },
 };
 
 const defaultStudioNotes = [
@@ -199,8 +301,25 @@ function saveStudioNotes(notes) {
   localStorage.setItem(STUDIO_NOTES_KEY, JSON.stringify(notes));
 }
 
+function normalizeLanguage(language) {
+  if (language.startsWith("ja")) return "ja";
+  if (language.startsWith("en")) return "en";
+  return "ko";
+}
+
+function getCurrentLanguage() {
+  const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
+  if (savedLanguage && translations[savedLanguage]) return savedLanguage;
+  return normalizeLanguage(navigator.language || "ko");
+}
+
+function t(key) {
+  return translations[getCurrentLanguage()][key] || translations.ko[key] || key;
+}
+
 function formatDate(value) {
-  return new Intl.DateTimeFormat("ko-KR", {
+  const localeMap = { ko: "ko-KR", en: "en-US", ja: "ja-JP" };
+  return new Intl.DateTimeFormat(localeMap[getCurrentLanguage()], {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -220,11 +339,14 @@ function escapeHtml(value) {
 
 function applySettings() {
   const settings = loadSettings();
+  const language = getCurrentLanguage();
+  const languageDefaults = translatedDefaultSettings[language] || {};
   document.title = document.body.classList.contains("admin-page") ? "BaconCake Root Console" : settings.siteTitle;
 
   Object.entries(settings).forEach(([key, value]) => {
+    const translatedValue = value === defaultSettings[key] && languageDefaults[key] ? languageDefaults[key] : value;
     document.querySelectorAll(`[data-setting="${key}"]`).forEach((element) => {
-      element.textContent = value;
+      element.textContent = translatedValue;
     });
   });
 }
@@ -233,20 +355,20 @@ async function renderPosts({ editable = false } = {}) {
   const noticeList = document.querySelector("#noticeList");
   if (!noticeList) return;
 
-  noticeList.innerHTML = `<article class="notice-card"><h3>불러오는 중입니다.</h3><p>잠시만 기다려주세요.</p></article>`;
+  noticeList.innerHTML = `<article class="notice-card"><h3>${t("loadingTitle")}</h3><p>${t("loadingBody")}</p></article>`;
 
   let posts = [];
   try {
     posts = await fetchPosts();
   } catch (error) {
-    noticeList.innerHTML = `<article class="notice-card"><h3>공지사항을 불러오지 못했습니다.</h3><p>${escapeHtml(error.message)}</p></article>`;
+    noticeList.innerHTML = `<article class="notice-card"><h3>${t("noticeLoadFailure")}</h3><p>${escapeHtml(error.message)}</p></article>`;
     return;
   }
 
   posts = posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   if (!posts.length) {
-    noticeList.innerHTML = `<article class="notice-card"><h3>등록된 공지가 없습니다.</h3><p>새 소식이 등록되면 이곳에 표시됩니다.</p></article>`;
+    noticeList.innerHTML = `<article class="notice-card"><h3>${t("emptyNoticeTitle")}</h3><p>${t("emptyNoticeBody")}</p></article>`;
     return;
   }
 
@@ -254,8 +376,8 @@ async function renderPosts({ editable = false } = {}) {
     .map((post) => {
       const actions = editable
         ? `<div class="notice-actions">
-            <button type="button" data-action="edit" data-id="${post.id}">수정</button>
-            <button type="button" data-action="delete" data-id="${post.id}">삭제</button>
+            <button type="button" data-action="edit" data-id="${post.id}">${t("edit")}</button>
+            <button type="button" data-action="delete" data-id="${post.id}">${t("delete")}</button>
           </div>`
         : "";
 
@@ -280,18 +402,18 @@ async function renderStudioNotes({ editable = false } = {}) {
   const studioGrid = document.querySelector("#studioGrid");
   if (!studioGrid) return;
 
-  studioGrid.innerHTML = `<article><h3>불러오는 중입니다.</h3><p>잠시만 기다려주세요.</p></article>`;
+  studioGrid.innerHTML = `<article><h3>${t("loadingTitle")}</h3><p>${t("loadingBody")}</p></article>`;
 
   let notes = [];
   try {
     notes = await fetchStudioNotes();
   } catch (error) {
-    studioGrid.innerHTML = `<article><h3>스튜디오 노트를 불러오지 못했습니다.</h3><p>${escapeHtml(error.message)}</p></article>`;
+    studioGrid.innerHTML = `<article><h3>${t("studioLoadFailure")}</h3><p>${escapeHtml(error.message)}</p></article>`;
     return;
   }
 
   if (!notes.length) {
-    studioGrid.innerHTML = `<article><h3>등록된 스튜디오 노트가 없습니다.</h3><p>새 노트가 등록되면 이곳에 표시됩니다.</p></article>`;
+    studioGrid.innerHTML = `<article><h3>${t("emptyStudioTitle")}</h3><p>${t("emptyStudioBody")}</p></article>`;
     return;
   }
 
@@ -299,8 +421,8 @@ async function renderStudioNotes({ editable = false } = {}) {
     .map((note) => {
       const actions = editable
         ? `<div class="notice-actions">
-            <button type="button" data-action="edit-studio" data-id="${note.id}">수정</button>
-            <button type="button" data-action="delete-studio" data-id="${note.id}">삭제</button>
+            <button type="button" data-action="edit-studio" data-id="${note.id}">${t("edit")}</button>
+            <button type="button" data-action="delete-studio" data-id="${note.id}">${t("delete")}</button>
           </div>`
         : "";
 
@@ -333,6 +455,11 @@ function setupAdminLogin() {
     adminEmail.value = "";
     adminPassword.value = "";
     adminLoginMessage.textContent = "";
+    adminDialog.querySelector("h2").textContent = t("adminAccessTitle");
+    adminDialog.querySelector("p").textContent = t("adminAccessBody");
+    adminEmail.placeholder = t("adminEmailPlaceholder");
+    adminPassword.placeholder = t("adminPasswordPlaceholder");
+    adminLoginForm.querySelector(".primary-action").textContent = t("adminMove");
     adminDialog.showModal();
     adminEmail.focus();
   });
@@ -340,11 +467,11 @@ function setupAdminLogin() {
   adminLoginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    adminLoginMessage.textContent = "로그인 중입니다...";
+    adminLoginMessage.textContent = t("adminLoginProgress");
     try {
       await signInAdmin(adminEmail.value.trim(), adminPassword.value);
     } catch (error) {
-      adminLoginMessage.textContent = "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.";
+      adminLoginMessage.textContent = t("adminLoginFailure");
       return;
     }
 
@@ -352,7 +479,59 @@ function setupAdminLogin() {
   });
 }
 
+function applyStaticTranslations() {
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    element.placeholder = t(element.dataset.i18nPlaceholder);
+  });
+}
+
+async function refreshTranslatedContent() {
+  applySettings();
+  applyStaticTranslations();
+  await renderPosts({ editable: document.body.classList.contains("admin-page") });
+  await renderStudioNotes({ editable: document.body.classList.contains("admin-page") });
+
+  if (typeof renderDetail === "function") {
+    await renderDetail();
+  }
+}
+
+function setupLanguageSwitcher() {
+  const switcher = document.createElement("div");
+  switcher.className = "language-switcher";
+  switcher.setAttribute("aria-label", "Language");
+  switcher.innerHTML = `
+    <button type="button" data-lang="ko">KO</button>
+    <button type="button" data-lang="en">EN</button>
+    <button type="button" data-lang="ja">JA</button>
+  `;
+  document.body.appendChild(switcher);
+
+  function updateActiveLanguage() {
+    switcher.querySelectorAll("button").forEach((button) => {
+      button.classList.toggle("active", button.dataset.lang === getCurrentLanguage());
+    });
+  }
+
+  switcher.addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-lang]");
+    if (!button) return;
+
+    localStorage.setItem(LANGUAGE_KEY, button.dataset.lang);
+    updateActiveLanguage();
+    await refreshTranslatedContent();
+  });
+
+  updateActiveLanguage();
+}
+
 applySettings();
+applyStaticTranslations();
 renderPosts();
 renderStudioNotes();
 setupAdminLogin();
+setupLanguageSwitcher();

@@ -11,22 +11,22 @@ async function renderDetail() {
 
   if (type === "notice") {
     item = (await fetchPosts()).find((post) => post.id === id);
-    label = "공지사항";
+    label = t("noticeLabel");
     backHref = "index.html#news";
   }
 
   if (type === "studio") {
     item = (await fetchStudioNotes()).find((note) => note.id === id);
-    label = "스튜디오 노트";
+    label = t("studioLabel");
     backHref = "index.html#studio";
   }
 
   if (!item) {
     detailView.innerHTML = `<article class="detail-card">
-      <p class="eyebrow">Not Found</p>
-      <h1>내용을 찾을 수 없습니다.</h1>
-      <p>삭제되었거나 잘못된 주소일 수 있습니다.</p>
-      <a class="secondary-action" href="index.html">홈으로 돌아가기</a>
+      <p class="eyebrow">${t("notFoundLabel")}</p>
+      <h1>${t("notFoundTitle")}</h1>
+      <p>${t("notFoundBody")}</p>
+      <a class="secondary-action" href="index.html">${t("homeBack")}</a>
     </article>`;
     return;
   }
@@ -40,7 +40,7 @@ async function renderDetail() {
     <div class="detail-meta">${meta}</div>
     <h1>${escapeHtml(item.title)}</h1>
     <p>${escapeHtml(item.body)}</p>
-    <a class="secondary-action" href="${backHref}">목록으로 돌아가기</a>
+    <a class="secondary-action" href="${backHref}">${t("listBack")}</a>
   </article>`;
 }
 

@@ -28,11 +28,11 @@
     <dialog class="admin-dialog" id="adminDialog">
       <form method="dialog" id="adminLoginForm">
         <button class="close-button" value="cancel" aria-label="닫기">×</button>
-        <h2>Admin Access</h2>
-        <p>관리자 계정으로 로그인하면 편집 화면으로 이동합니다.</p>
-        <input id="adminEmail" type="email" placeholder="이메일" autocomplete="username" />
-        <input id="adminPassword" type="password" placeholder="비밀번호" autocomplete="current-password" />
-        <button class="primary-action" type="submit">관리자 이동</button>
+        <h2 data-i18n="adminAccessTitle">Admin Access</h2>
+        <p data-i18n="adminAccessBody">관리자 계정으로 로그인하면 편집 화면으로 이동합니다.</p>
+        <input id="adminEmail" type="email" placeholder="이메일" autocomplete="username" data-i18n-placeholder="adminEmailPlaceholder" />
+        <input id="adminPassword" type="password" placeholder="비밀번호" autocomplete="current-password" data-i18n-placeholder="adminPasswordPlaceholder" />
+        <button class="primary-action" type="submit" data-i18n="adminMove">관리자 이동</button>
         <small id="adminLoginMessage"></small>
       </form>
     </dialog>
