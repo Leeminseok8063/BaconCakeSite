@@ -3,7 +3,6 @@ const SETTINGS_KEY = "bacon-cake-settings";
 const STUDIO_NOTES_KEY = "bacon-cake-studio-notes";
 const ADMIN_TOKEN_KEY = "bacon-cake-supabase-token";
 const ADMIN_REFRESH_KEY = "bacon-cake-supabase-refresh";
-const LANGUAGE_KEY = "bacon-cake-language";
 const PREVIEW_BODY_LIMIT = 170;
 const CANONICAL_ORIGIN = "https://leeminseok8063.github.io";
 const CANONICAL_BASE_PATH = "/BaconCakeSite";
@@ -24,124 +23,56 @@ function redirectStaleCustomDomain() {
 
 redirectStaleCustomDomain();
 
-const translations = {
-  ko: {
-    adminAccessTitle: "Admin Access",
-    adminAccessBody: "관리자 계정으로 로그인하면 편집 화면으로 이동합니다.",
-    adminEmailPlaceholder: "이메일",
-    adminPasswordPlaceholder: "비밀번호",
-    adminMove: "관리자 이동",
-    adminLoginProgress: "로그인 중입니다...",
-    adminLoginFailure: "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.",
-    studioIntroCta: "스튜디오 소개",
-    loadingTitle: "불러오는 중입니다.",
-    loadingBody: "잠시만 기다려주세요.",
-    noticeLoadFailure: "공지사항을 불러오지 못했습니다.",
-    studioLoadFailure: "스튜디오 노트를 불러오지 못했습니다.",
-    emptyNoticeTitle: "등록된 공지가 없습니다.",
-    emptyNoticeBody: "새 소식이 등록되면 이곳에 표시됩니다.",
-    emptyStudioTitle: "등록된 스튜디오 노트가 없습니다.",
-    emptyStudioBody: "새 노트가 등록되면 이곳에 표시됩니다.",
-    edit: "수정",
-    delete: "삭제",
-    noticeLabel: "공지사항",
-    studioLabel: "스튜디오 노트",
-    notFoundLabel: "Not Found",
-    notFoundTitle: "내용을 찾을 수 없습니다.",
-    notFoundBody: "삭제되었거나 잘못된 주소일 수 있습니다.",
-    homeBack: "홈으로 돌아가기",
-    listBack: "목록으로 돌아가기",
-  },
-  en: {
-    adminAccessTitle: "Admin Access",
-    adminAccessBody: "Sign in with an admin account to open the editor.",
-    adminEmailPlaceholder: "Email",
-    adminPasswordPlaceholder: "Password",
-    adminMove: "Open admin",
-    adminLoginProgress: "Signing in...",
-    adminLoginFailure: "Sign-in failed. Check your email and password.",
-    studioIntroCta: "Studio Intro",
-    loadingTitle: "Loading.",
-    loadingBody: "Please wait a moment.",
-    noticeLoadFailure: "Could not load notices.",
-    studioLoadFailure: "Could not load studio notes.",
-    emptyNoticeTitle: "No notices yet.",
-    emptyNoticeBody: "New updates will appear here.",
-    emptyStudioTitle: "No studio notes yet.",
-    emptyStudioBody: "New notes will appear here.",
-    edit: "Edit",
-    delete: "Delete",
-    noticeLabel: "Notice",
-    studioLabel: "Studio Note",
-    notFoundLabel: "Not Found",
-    notFoundTitle: "Content not found.",
-    notFoundBody: "It may have been deleted or the link may be incorrect.",
-    homeBack: "Back home",
-    listBack: "Back to list",
-  },
-  ja: {
-    adminAccessTitle: "Admin Access",
-    adminAccessBody: "管理者アカウントでログインすると編集画面に移動します。",
-    adminEmailPlaceholder: "メール",
-    adminPasswordPlaceholder: "パスワード",
-    adminMove: "管理画面へ",
-    adminLoginProgress: "ログイン中です...",
-    adminLoginFailure: "ログインに失敗しました。メールとパスワードを確認してください。",
-    studioIntroCta: "スタジオ紹介",
-    loadingTitle: "読み込み中です。",
-    loadingBody: "少々お待ちください。",
-    noticeLoadFailure: "お知らせを読み込めませんでした。",
-    studioLoadFailure: "スタジオノートを読み込めませんでした。",
-    emptyNoticeTitle: "登録されたお知らせはありません。",
-    emptyNoticeBody: "新しいお知らせが登録されるとここに表示されます。",
-    emptyStudioTitle: "登録されたスタジオノートはありません。",
-    emptyStudioBody: "新しいノートが登録されるとここに表示されます。",
-    edit: "編集",
-    delete: "削除",
-    noticeLabel: "お知らせ",
-    studioLabel: "スタジオノート",
-    notFoundLabel: "Not Found",
-    notFoundTitle: "内容が見つかりません。",
-    notFoundBody: "削除されたか、リンクが正しくない可能性があります。",
-    homeBack: "ホームへ戻る",
-    listBack: "一覧へ戻る",
-  },
+const UI_TEXT = {
+  adminAccessTitle: "관리자 로그인",
+  adminAccessBody: "관리자 계정으로 로그인하면 편집 화면으로 이동합니다.",
+  adminEmailPlaceholder: "이메일",
+  adminPasswordPlaceholder: "비밀번호",
+  adminMove: "관리자 이동",
+  adminLoginProgress: "로그인 중입니다...",
+  adminLoginFailure: "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.",
+  loadingTitle: "불러오는 중입니다.",
+  loadingBody: "잠시만 기다려주세요.",
+  noticeLoadFailure: "공지사항을 불러오지 못했습니다.",
+  studioLoadFailure: "스튜디오 노트를 불러오지 못했습니다.",
+  emptyNoticeTitle: "등록된 공지가 없습니다.",
+  emptyNoticeBody: "새 소식이 등록되면 이곳에 표시됩니다.",
+  emptyStudioTitle: "등록된 스튜디오 노트가 없습니다.",
+  emptyStudioBody: "새 노트가 등록되면 이곳에 표시됩니다.",
+  edit: "수정",
+  delete: "삭제",
+  notFoundLabel: "내용 없음",
+  notFoundTitle: "내용을 찾을 수 없습니다.",
+  notFoundBody: "삭제되었거나 잘못된 주소일 수 있습니다.",
+  homeBack: "홈으로 돌아가기",
+  listBack: "목록으로 돌아가기",
 };
 
 const defaultSettings = {
   brandName: "BaconCakeOfficial.com",
   siteTitle: "BaconCakeOfficial.com",
-  heroEyebrow: "BaconCake Studio · Official",
+  heroEyebrow: "BaconCake 스튜디오 · 공식",
   heroTitle: "BaconCake",
   heroDescription: "BaconCake는 작고 선명한 아이디어를 게임, 웹, 커뮤니티 경험으로 만드는 개발사입니다.",
-};
-
-const translatedDefaultSettings = {
-  en: {
-    heroDescription: "BaconCake turns small, clear ideas into games, web experiences, and community tools.",
-  },
-  ja: {
-    heroDescription: "BaconCakeは小さく明確なアイデアをゲーム、Web、コミュニティ体験にします。",
-  },
 };
 
 const defaultStudioNotes = [
   {
     id: crypto.randomUUID(),
     number: "01",
-    title: "Game Development",
+    title: "게임 개발",
     body: "가볍게 시작해 오래 기억되는 플레이 경험을 설계합니다.",
   },
   {
     id: crypto.randomUUID(),
     number: "02",
-    title: "Web Experience",
+    title: "웹 경험",
     body: "브랜드, 커뮤니티, 업데이트 소식을 담는 웹페이지를 만듭니다.",
   },
   {
     id: crypto.randomUUID(),
     number: "03",
-    title: "Creative Systems",
+    title: "창작 시스템",
     body: "작은 팀이 빠르게 운영할 수 있는 도구와 콘텐츠 흐름을 다듬습니다.",
   },
 ];
@@ -407,25 +338,12 @@ function saveStudioNotes(notes) {
   localStorage.setItem(STUDIO_NOTES_KEY, JSON.stringify(notes));
 }
 
-function normalizeLanguage(language) {
-  if (language.startsWith("ja")) return "ja";
-  if (language.startsWith("en")) return "en";
-  return "ko";
-}
-
-function getCurrentLanguage() {
-  const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
-  if (savedLanguage && translations[savedLanguage]) return savedLanguage;
-  return normalizeLanguage(navigator.language || "ko");
-}
-
 function t(key) {
-  return translations[getCurrentLanguage()][key] || translations.ko[key] || key;
+  return UI_TEXT[key] || key;
 }
 
 function formatDate(value) {
-  const localeMap = { ko: "ko-KR", en: "en-US", ja: "ja-JP" };
-  return new Intl.DateTimeFormat(localeMap[getCurrentLanguage()], {
+  return new Intl.DateTimeFormat("ko-KR", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -493,7 +411,7 @@ function renderArticleCard(item, { editable = false, actions = "", detailType = 
 function renderAlbumCard(item, { editable = false, actions = "", detailType = "custom" } = {}) {
   const content = `<article>
     <header>
-      <span>${escapeHtml(item.number || "ITEM")}</span>
+      <span>${escapeHtml(item.number || "항목")}</span>
       ${actions}
     </header>
     <h3>${escapeHtml(item.title)}</h3>
@@ -506,14 +424,11 @@ function renderAlbumCard(item, { editable = false, actions = "", detailType = "c
 }
 
 function applySettings(settings = loadSettings()) {
-  const language = getCurrentLanguage();
-  const languageDefaults = translatedDefaultSettings[language] || {};
-  document.title = document.body.classList.contains("admin-page") ? "BaconCake Root Console" : settings.siteTitle;
+  document.title = document.body.classList.contains("admin-page") ? "BaconCake 관리자 콘솔" : settings.siteTitle;
 
   Object.entries(settings).forEach(([key, value]) => {
-    const translatedValue = value === defaultSettings[key] && languageDefaults[key] ? languageDefaults[key] : value;
     document.querySelectorAll(`[data-setting="${key}"]`).forEach((element) => {
-      element.textContent = translatedValue;
+      element.textContent = value;
     });
   });
 
@@ -634,7 +549,7 @@ async function renderCustomSections({ editable = false } = {}) {
   if (!sections.length) {
     customSections.innerHTML = `<section class="section-grid empty-site">
       <div class="section-heading">
-        <p class="eyebrow">Empty Site</p>
+        <p class="eyebrow">빈 사이트</p>
         <h2>등록된 섹션이 없습니다.</h2>
       </div>
       <article class="notice-card">
@@ -724,63 +639,10 @@ function setupAdminLogin() {
   });
 }
 
-function applyStaticTranslations() {
-  document.querySelectorAll("[data-i18n]").forEach((element) => {
-    element.textContent = t(element.dataset.i18n);
-  });
-
-  document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
-    element.placeholder = t(element.dataset.i18nPlaceholder);
-  });
-}
-
-async function refreshTranslatedContent() {
-  const settings = await fetchSiteSettings();
-  applySettings(settings);
-  applyStaticTranslations();
-  await renderSectionNav();
-  await renderCustomSections({ editable: document.body.classList.contains("admin-page") });
-
-  if (typeof renderDetail === "function") {
-    await renderDetail();
-  }
-}
-
-function setupLanguageSwitcher() {
-  const switcher = document.createElement("div");
-  switcher.className = "language-switcher";
-  switcher.setAttribute("aria-label", "Language");
-  switcher.innerHTML = `
-    <button type="button" data-lang="ko">KO</button>
-    <button type="button" data-lang="en">EN</button>
-    <button type="button" data-lang="ja">JA</button>
-  `;
-  document.body.appendChild(switcher);
-
-  function updateActiveLanguage() {
-    switcher.querySelectorAll("button").forEach((button) => {
-      button.classList.toggle("active", button.dataset.lang === getCurrentLanguage());
-    });
-  }
-
-  switcher.addEventListener("click", async (event) => {
-    const button = event.target.closest("button[data-lang]");
-    if (!button) return;
-
-    localStorage.setItem(LANGUAGE_KEY, button.dataset.lang);
-    updateActiveLanguage();
-    await refreshTranslatedContent();
-  });
-
-  updateActiveLanguage();
-}
-
 async function initSite() {
   applySettings();
-  applyStaticTranslations();
   renderCustomSections();
   setupAdminLogin();
-  setupLanguageSwitcher();
 
   const settings = await fetchSiteSettings();
   applySettings(settings);
