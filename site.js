@@ -214,9 +214,10 @@ function clearAdminSession() {
 }
 
 function supabaseHeaders({ authToken, prefer } = {}) {
+  const bearerToken = String(authToken || BACONCAKE_SUPABASE.anonKey || "").trim();
   const headers = {
     apikey: BACONCAKE_SUPABASE.anonKey,
-    Authorization: `Bearer ${authToken || BACONCAKE_SUPABASE.anonKey}`,
+    Authorization: `Bearer ${bearerToken}`,
     "Content-Type": "application/json",
   };
 
@@ -224,14 +225,25 @@ function supabaseHeaders({ authToken, prefer } = {}) {
   return headers;
 }
 
+function supabaseUrl(path) {
+  const baseUrl = String(BACONCAKE_SUPABASE.restUrl || "").replace(/\/+$/, "");
+  const cleanPath = String(path || "").startsWith("/") ? path : `/${path}`;
+  return `${baseUrl}${cleanPath}`;
+}
+
 async function supabaseRequest(path, options = {}) {
-  const response = await fetch(`${BACONCAKE_SUPABASE.restUrl}${path}`, {
-    ...options,
-    headers: {
-      ...supabaseHeaders({ authToken: options.authToken, prefer: options.prefer }),
-      ...(options.headers || {}),
-    },
-  });
+  let response;
+  try {
+    response = await fetch(supabaseUrl(path), {
+      ...options,
+      headers: {
+        ...supabaseHeaders({ authToken: options.authToken, prefer: options.prefer }),
+        ...(options.headers || {}),
+      },
+    });
+  } catch (error) {
+    throw new Error(`Supabase 요청을 만들지 못했습니다. 설정 주소와 로그인 세션을 확인하세요. (${error.message})`);
+  }
 
   if (!response.ok) {
     const message = await response.text();

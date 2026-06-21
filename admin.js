@@ -95,6 +95,14 @@ function storageBaseUrl() {
   return BACONCAKE_SUPABASE.restUrl.replace("/rest/v1", "/storage/v1");
 }
 
+function storageObjectUrl(path) {
+  return `${storageBaseUrl().replace(/\/+$/, "")}/object/content-media/${encodeStoragePath(path)}`;
+}
+
+function storagePublicUrl(path) {
+  return `${storageBaseUrl().replace(/\/+$/, "")}/object/public/content-media/${encodeStoragePath(path)}`;
+}
+
 function encodeStoragePath(path) {
   return path.split("/").map(encodeURIComponent).join("/");
 }
@@ -114,17 +122,22 @@ async function uploadMediaFiles(files, folder) {
   return Promise.all(
     uploads.map(async (file) => {
       const path = `${folder}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
-      const encodedPath = encodeStoragePath(path);
-      const response = await fetch(`${storageBaseUrl()}/object/content-media/${encodedPath}`, {
-        method: "POST",
-        headers: {
-          apikey: BACONCAKE_SUPABASE.anonKey,
-          Authorization: `Bearer ${token}`,
-          "Content-Type": file.type || "application/octet-stream",
-          "x-upsert": "false",
-        },
-        body: file,
-      });
+      let response;
+
+      try {
+        response = await fetch(storageObjectUrl(path), {
+          method: "POST",
+          headers: {
+            apikey: BACONCAKE_SUPABASE.anonKey,
+            Authorization: `Bearer ${String(token).trim()}`,
+            "Content-Type": file.type || "application/octet-stream",
+            "x-upsert": "false",
+          },
+          body: file,
+        });
+      } catch (error) {
+        throw new Error(`파일 업로드 요청을 만들지 못했습니다: ${file.name}. 다시 로그인한 뒤 시도하세요. (${error.message})`);
+      }
 
       if (!response.ok) {
         const message = await response.text();
@@ -134,7 +147,7 @@ async function uploadMediaFiles(files, folder) {
       return {
         name: file.name,
         type: file.type || "application/octet-stream",
-        url: `${storageBaseUrl()}/object/public/content-media/${encodedPath}`,
+        url: storagePublicUrl(path),
       };
     }),
   );
