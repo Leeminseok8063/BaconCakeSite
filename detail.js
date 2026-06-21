@@ -1,6 +1,6 @@
 const detailView = document.querySelector("#detailView");
 
-function renderDetail() {
+async function renderDetail() {
   const params = new URLSearchParams(window.location.search);
   const type = params.get("type");
   const id = params.get("id");
@@ -10,13 +10,13 @@ function renderDetail() {
   let backHref;
 
   if (type === "notice") {
-    item = loadPosts().find((post) => post.id === id);
+    item = (await fetchPosts()).find((post) => post.id === id);
     label = "공지사항";
     backHref = "index.html#news";
   }
 
   if (type === "studio") {
-    item = loadStudioNotes().find((note) => note.id === id);
+    item = (await fetchStudioNotes()).find((note) => note.id === id);
     label = "스튜디오 노트";
     backHref = "index.html#studio";
   }

@@ -1,8 +1,8 @@
 const POSTS_KEY = "bacon-cake-posts";
 const SETTINGS_KEY = "bacon-cake-settings";
 const STUDIO_NOTES_KEY = "bacon-cake-studio-notes";
-const ADMIN_SESSION_KEY = "bacon-cake-admin";
-const ADMIN_PASSWORD = "0427";
+const ADMIN_TOKEN_KEY = "bacon-cake-supabase-token";
+const ADMIN_REFRESH_KEY = "bacon-cake-supabase-refresh";
 
 const defaultSettings = {
   brandName: "BaconCakeOfficial.com",
@@ -73,6 +73,90 @@ function loadPosts() {
   return readJson(POSTS_KEY, defaultPosts);
 }
 
+function getStoredAdminToken() {
+  return localStorage.getItem(ADMIN_TOKEN_KEY);
+}
+
+function storeAdminSession(session) {
+  localStorage.setItem(ADMIN_TOKEN_KEY, session.access_token);
+  localStorage.setItem(ADMIN_REFRESH_KEY, session.refresh_token);
+}
+
+function clearAdminSession() {
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+  localStorage.removeItem(ADMIN_REFRESH_KEY);
+}
+
+function supabaseHeaders({ authToken, prefer } = {}) {
+  const headers = {
+    apikey: BACONCAKE_SUPABASE.anonKey,
+    Authorization: `Bearer ${authToken || BACONCAKE_SUPABASE.anonKey}`,
+    "Content-Type": "application/json",
+  };
+
+  if (prefer) headers.Prefer = prefer;
+  return headers;
+}
+
+async function supabaseRequest(path, options = {}) {
+  const response = await fetch(`${BACONCAKE_SUPABASE.restUrl}${path}`, {
+    ...options,
+    headers: {
+      ...supabaseHeaders({ authToken: options.authToken, prefer: options.prefer }),
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Supabase request failed: ${response.status}`);
+  }
+
+  if (response.status === 204) return null;
+  return response.json();
+}
+
+async function signInAdmin(email, password) {
+  const response = await fetch(`${BACONCAKE_SUPABASE.authUrl}/token?grant_type=password`, {
+    method: "POST",
+    headers: supabaseHeaders(),
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error_description || data.msg || "Login failed");
+  storeAdminSession(data);
+  return data;
+}
+
+async function fetchAdminUser() {
+  const token = getStoredAdminToken();
+  if (!token) return null;
+
+  const response = await fetch(`${BACONCAKE_SUPABASE.authUrl}/user`, {
+    headers: supabaseHeaders({ authToken: token }),
+  });
+
+  if (!response.ok) {
+    clearAdminSession();
+    return null;
+  }
+
+  return response.json();
+}
+
+async function fetchPosts() {
+  if (!window.BACONCAKE_SUPABASE) return loadPosts();
+
+  const data = await supabaseRequest("/notices?select=id,title,body,created_at&order=created_at.desc");
+  return data.map((post) => ({
+    id: post.id,
+    title: post.title,
+    body: post.body,
+    createdAt: post.created_at,
+  }));
+}
+
 function savePosts(posts) {
   localStorage.setItem(POSTS_KEY, JSON.stringify(posts));
 }
@@ -96,6 +180,19 @@ function loadStudioNotes() {
 
   if (changed) saveStudioNotes(normalizedNotes);
   return normalizedNotes;
+}
+
+async function fetchStudioNotes() {
+  if (!window.BACONCAKE_SUPABASE) return loadStudioNotes();
+
+  const data = await supabaseRequest("/studio_notes?select=id,number,title,body,created_at&order=created_at.asc");
+  return data.map((note) => ({
+    id: note.id,
+    number: note.number,
+    title: note.title,
+    body: note.body,
+    createdAt: note.created_at,
+  }));
 }
 
 function saveStudioNotes(notes) {
@@ -132,11 +229,21 @@ function applySettings() {
   });
 }
 
-function renderPosts({ editable = false } = {}) {
+async function renderPosts({ editable = false } = {}) {
   const noticeList = document.querySelector("#noticeList");
   if (!noticeList) return;
 
-  const posts = loadPosts().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  noticeList.innerHTML = `<article class="notice-card"><h3>불러오는 중입니다.</h3><p>잠시만 기다려주세요.</p></article>`;
+
+  let posts = [];
+  try {
+    posts = await fetchPosts();
+  } catch (error) {
+    noticeList.innerHTML = `<article class="notice-card"><h3>공지사항을 불러오지 못했습니다.</h3><p>${escapeHtml(error.message)}</p></article>`;
+    return;
+  }
+
+  posts = posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   if (!posts.length) {
     noticeList.innerHTML = `<article class="notice-card"><h3>등록된 공지가 없습니다.</h3><p>새 소식이 등록되면 이곳에 표시됩니다.</p></article>`;
@@ -169,11 +276,20 @@ function renderPosts({ editable = false } = {}) {
     .join("");
 }
 
-function renderStudioNotes({ editable = false } = {}) {
+async function renderStudioNotes({ editable = false } = {}) {
   const studioGrid = document.querySelector("#studioGrid");
   if (!studioGrid) return;
 
-  const notes = loadStudioNotes();
+  studioGrid.innerHTML = `<article><h3>불러오는 중입니다.</h3><p>잠시만 기다려주세요.</p></article>`;
+
+  let notes = [];
+  try {
+    notes = await fetchStudioNotes();
+  } catch (error) {
+    studioGrid.innerHTML = `<article><h3>스튜디오 노트를 불러오지 못했습니다.</h3><p>${escapeHtml(error.message)}</p></article>`;
+    return;
+  }
+
   if (!notes.length) {
     studioGrid.innerHTML = `<article><h3>등록된 스튜디오 노트가 없습니다.</h3><p>새 노트가 등록되면 이곳에 표시됩니다.</p></article>`;
     return;
@@ -207,27 +323,31 @@ function setupAdminLogin() {
   const adminOpen = document.querySelector("#adminOpen");
   const adminDialog = document.querySelector("#adminDialog");
   const adminLoginForm = document.querySelector("#adminLoginForm");
+  const adminEmail = document.querySelector("#adminEmail");
   const adminPassword = document.querySelector("#adminPassword");
   const adminLoginMessage = document.querySelector("#adminLoginMessage");
 
-  if (!adminOpen || !adminDialog || !adminLoginForm || !adminPassword || !adminLoginMessage) return;
+  if (!adminOpen || !adminDialog || !adminLoginForm || !adminEmail || !adminPassword || !adminLoginMessage) return;
 
   adminOpen.addEventListener("click", () => {
+    adminEmail.value = "";
     adminPassword.value = "";
     adminLoginMessage.textContent = "";
     adminDialog.showModal();
-    adminPassword.focus();
+    adminEmail.focus();
   });
 
-  adminLoginForm.addEventListener("submit", (event) => {
+  adminLoginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    if (adminPassword.value.trim() !== ADMIN_PASSWORD) {
-      adminLoginMessage.textContent = "비밀번호가 올바르지 않습니다.";
+    adminLoginMessage.textContent = "로그인 중입니다...";
+    try {
+      await signInAdmin(adminEmail.value.trim(), adminPassword.value);
+    } catch (error) {
+      adminLoginMessage.textContent = "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.";
       return;
     }
 
-    sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
     window.location.href = "admin.html";
   });
 }
