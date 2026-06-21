@@ -267,6 +267,68 @@ a {
   resize: vertical;
 }
 
+.admin-dialog {
+  background: transparent;
+  border: 0;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 0;
+}
+
+.admin-dialog::backdrop {
+  background: rgba(51, 17, 9, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.admin-dialog form {
+  background: var(--cream);
+  border: 4px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  position: relative;
+}
+
+.admin-dialog h2,
+.admin-dialog p,
+.admin-dialog small {
+  margin: 0;
+}
+
+.admin-dialog h2 {
+  font-size: 2rem;
+  font-weight: 950;
+}
+
+.admin-dialog p,
+.admin-dialog small {
+  font-weight: 800;
+}
+
+.admin-dialog input {
+  background: #fff9df;
+  border: 2px solid rgba(51, 17, 9, 0.2);
+  border-radius: 8px;
+  color: var(--ink);
+  outline: 0;
+  padding: 12px 14px;
+  width: 100%;
+}
+
+.close-button {
+  background: var(--ink);
+  border: 0;
+  border-radius: 50%;
+  color: var(--cream);
+  cursor: pointer;
+  height: 34px;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 34px;
+}
+
 .notice-list,
 .studio-grid {
   display: grid;

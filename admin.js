@@ -1,3 +1,7 @@
+if (sessionStorage.getItem(ADMIN_SESSION_KEY) !== "true") {
+  window.location.replace("index.html");
+}
+
 const settingsForm = document.querySelector("#settingsForm");
 const studioForm = document.querySelector("#studioForm");
 const studioNoteNumber = document.querySelector("#studioNoteNumber");
@@ -15,6 +19,7 @@ const resetSettings = document.querySelector("#resetSettings");
 const clearStudioNotes = document.querySelector("#clearStudioNotes");
 const noticeList = document.querySelector("#noticeList");
 const studioGrid = document.querySelector("#studioGrid");
+const adminLogout = document.querySelector("#adminLogout");
 
 let editingId = null;
 let editingStudioId = null;
@@ -58,6 +63,11 @@ resetSettings.addEventListener("click", () => {
   saveSettings(defaultSettings);
   applySettings();
   fillSettingsForm();
+});
+
+adminLogout.addEventListener("click", () => {
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  window.location.href = "index.html";
 });
 
 studioForm.addEventListener("submit", (event) => {

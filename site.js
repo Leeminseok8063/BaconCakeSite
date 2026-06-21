@@ -1,6 +1,8 @@
 const POSTS_KEY = "bacon-cake-posts";
 const SETTINGS_KEY = "bacon-cake-settings";
 const STUDIO_NOTES_KEY = "bacon-cake-studio-notes";
+const ADMIN_SESSION_KEY = "bacon-cake-admin";
+const ADMIN_PASSWORD = "0427";
 
 const defaultSettings = {
   brandName: "BaconCakeOfficial.com",
@@ -191,6 +193,36 @@ function renderStudioNotes({ editable = false } = {}) {
     .join("");
 }
 
+function setupAdminLogin() {
+  const adminOpen = document.querySelector("#adminOpen");
+  const adminDialog = document.querySelector("#adminDialog");
+  const adminLoginForm = document.querySelector("#adminLoginForm");
+  const adminPassword = document.querySelector("#adminPassword");
+  const adminLoginMessage = document.querySelector("#adminLoginMessage");
+
+  if (!adminOpen || !adminDialog || !adminLoginForm || !adminPassword || !adminLoginMessage) return;
+
+  adminOpen.addEventListener("click", () => {
+    adminPassword.value = "";
+    adminLoginMessage.textContent = "";
+    adminDialog.showModal();
+    adminPassword.focus();
+  });
+
+  adminLoginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (adminPassword.value.trim() !== ADMIN_PASSWORD) {
+      adminLoginMessage.textContent = "비밀번호가 올바르지 않습니다.";
+      return;
+    }
+
+    sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+    window.location.href = "admin.html";
+  });
+}
+
 applySettings();
 renderPosts();
 renderStudioNotes();
+setupAdminLogin();
