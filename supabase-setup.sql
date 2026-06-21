@@ -6,11 +6,28 @@ create table if not exists public.content_sections (
   title text not null,
   slug text,
   layout text not null default 'article' check (layout in ('article', 'album')),
+  sort_order integer,
   created_at timestamptz not null default now()
 );
 
 alter table public.content_sections
 add column if not exists slug text;
+
+alter table public.content_sections
+add column if not exists sort_order integer;
+
+with ranked_sections as (
+  select id, row_number() over (order by created_at asc, id asc) * 10 as next_order
+  from public.content_sections
+  where sort_order is null
+)
+update public.content_sections
+set sort_order = ranked_sections.next_order
+from ranked_sections
+where public.content_sections.id = ranked_sections.id;
+
+alter table public.content_sections
+alter column sort_order set default 0;
 
 create unique index if not exists content_sections_slug_key
 on public.content_sections (slug)

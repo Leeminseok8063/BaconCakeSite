@@ -283,6 +283,11 @@ a {
   padding: 8px 10px;
 }
 
+.notice-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
 .admin-panel label {
   display: grid;
   font-weight: 900;

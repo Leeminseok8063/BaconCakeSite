@@ -224,7 +224,7 @@ async function fetchCustomSections() {
   if (!window.BACONCAKE_SUPABASE) return [];
 
   try {
-    return await supabaseRequest("/content_sections?select=id,eyebrow,title,slug,layout,created_at&order=created_at.asc");
+    return await supabaseRequest("/content_sections?select=id,eyebrow,title,slug,layout,sort_order,created_at&order=sort_order.asc,created_at.asc");
   } catch {
     try {
       return await supabaseRequest("/content_sections?select=id,eyebrow,title,layout,created_at&order=created_at.asc");

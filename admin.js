@@ -148,11 +148,12 @@ async function uploadMediaFiles(files, folder) {
 }
 
 async function createSection(eyebrow, title, slug, layout) {
+  const sortOrder = await nextSectionOrder();
   await supabaseRequest("/content_sections", {
     method: "POST",
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
-    body: JSON.stringify({ eyebrow, title, slug, layout }),
+    body: JSON.stringify({ eyebrow, title, slug, layout, sort_order: sortOrder }),
   });
 }
 
@@ -171,6 +172,41 @@ async function deleteSection(id) {
     authToken: getStoredAdminToken(),
     prefer: "return=minimal",
   });
+}
+
+async function nextSectionOrder() {
+  const sections = await fetchCustomSections();
+  const maxOrder = sections.reduce((max, section, index) => {
+    const order = Number.isFinite(section.sort_order) ? section.sort_order : index * 10;
+    return Math.max(max, order);
+  }, 0);
+  return maxOrder + 10;
+}
+
+async function updateSectionOrder(id, sortOrder) {
+  await supabaseRequest(`/content_sections?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    authToken: getStoredAdminToken(),
+    prefer: "return=minimal",
+    body: JSON.stringify({ sort_order: sortOrder }),
+  });
+}
+
+async function moveSection(id, direction) {
+  const sections = await fetchCustomSections();
+  const currentIndex = sections.findIndex((section) => section.id === id);
+  const targetIndex = currentIndex + direction;
+  if (currentIndex < 0 || targetIndex < 0 || targetIndex >= sections.length) return;
+
+  const current = sections[currentIndex];
+  const target = sections[targetIndex];
+  const currentOrder = Number.isFinite(current.sort_order) ? current.sort_order : currentIndex * 10;
+  const targetOrder = Number.isFinite(target.sort_order) ? target.sort_order : targetIndex * 10;
+
+  await Promise.all([
+    updateSectionOrder(current.id, targetOrder),
+    updateSectionOrder(target.id, currentOrder),
+  ]);
 }
 
 async function createCustomEntry(sectionId, number, title, slug, body, mediaItems) {
@@ -209,7 +245,7 @@ async function refreshSectionAdmin() {
 
   sectionList.innerHTML = sections.length
     ? sections
-        .map((section) => {
+        .map((section, index) => {
           const count = entries.filter((entry) => entry.section_id === section.id).length;
           const sectionUrl = publicUrl(`index.html#${sectionHash(section)}`);
           return `<article class="section-admin-item">
@@ -219,6 +255,8 @@ async function refreshSectionAdmin() {
               <a href="${sectionUrl}" target="_blank" rel="noreferrer">${sectionUrl}</a>
             </div>
             <div class="notice-actions">
+              <button type="button" data-action="move-section-up" data-id="${section.id}" ${index === 0 ? "disabled" : ""}>위로</button>
+              <button type="button" data-action="move-section-down" data-id="${section.id}" ${index === sections.length - 1 ? "disabled" : ""}>아래로</button>
               <button type="button" data-action="edit-section" data-id="${section.id}">수정</button>
               <button type="button" data-action="delete-section" data-id="${section.id}">삭제</button>
             </div>
@@ -313,6 +351,15 @@ sectionList.addEventListener("click", async (event) => {
     submitSection.textContent = "수정 저장";
     cancelSectionEdit.classList.remove("hidden");
     sectionForm.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  if (button.dataset.action === "move-section-up" || button.dataset.action === "move-section-down") {
+    try {
+      await moveSection(id, button.dataset.action === "move-section-up" ? -1 : 1);
+      await refreshCustomAdminPreview();
+    } catch (error) {
+      alert(adminErrorMessage("섹션 순서 변경", error));
+    }
   }
 
   if (button.dataset.action === "delete-section") {
