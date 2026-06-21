@@ -112,6 +112,21 @@ function contentPayload(fields, mediaItems) {
   return payload;
 }
 
+function adminErrorMessage(action, error) {
+  const message = error?.message || String(error);
+  const lowerMessage = message.toLowerCase();
+
+  if (message.includes('"code":"42501"') || lowerMessage.includes("row-level security")) {
+    return `${action} 실패: Supabase RLS 정책이 아직 맞지 않습니다. Supabase SQL Editor에서 supabase-setup.sql 전체를 다시 실행한 뒤, 관리자에서 로그아웃 후 재로그인해주세요.`;
+  }
+
+  if (lowerMessage.includes("jwt") || lowerMessage.includes("expired") || lowerMessage.includes("invalid token")) {
+    return `${action} 실패: 관리자 로그인 세션이 만료되었습니다. 로그아웃 후 다시 로그인해주세요.`;
+  }
+
+  return `${action} 실패: ${message}`;
+}
+
 async function uploadMediaFiles(files, folder) {
   const token = getStoredAdminToken();
   const uploads = [...files];
@@ -296,7 +311,7 @@ settingsForm.addEventListener("submit", async (event) => {
     applySettings(settings);
     fillSettingsForm(settings);
   } catch (error) {
-    alert(`사이트 문구 저장 실패: ${error.message}`);
+    alert(adminErrorMessage("사이트 문구 저장", error));
   }
 });
 
@@ -306,7 +321,7 @@ resetSettings.addEventListener("click", async () => {
     applySettings(defaultSettings);
     fillSettingsForm(defaultSettings);
   } catch (error) {
-    alert(`기본값 저장 실패: ${error.message}`);
+    alert(adminErrorMessage("기본값 저장", error));
   }
 });
 
@@ -338,7 +353,7 @@ studioForm.addEventListener("submit", async (event) => {
     resetStudioEditor();
     await renderStudioNotes({ editable: true });
   } catch (error) {
-    alert(`스튜디오 노트 저장 실패: ${error.message}`);
+    alert(adminErrorMessage("스튜디오 노트 저장", error));
   } finally {
     submitStudioNote.disabled = false;
   }
@@ -353,7 +368,7 @@ clearStudioNotes.addEventListener("click", async () => {
     resetStudioEditor();
     await renderStudioNotes({ editable: true });
   } catch (error) {
-    alert(`스튜디오 노트 삭제 실패: ${error.message}`);
+    alert(adminErrorMessage("스튜디오 노트 삭제", error));
   }
 });
 
@@ -379,7 +394,7 @@ postForm.addEventListener("submit", async (event) => {
     resetEditor();
     await renderPosts({ editable: true });
   } catch (error) {
-    alert(`공지 저장 실패: ${error.message}`);
+    alert(adminErrorMessage("공지 저장", error));
   } finally {
     submitPost.disabled = false;
   }
@@ -394,7 +409,7 @@ clearPosts.addEventListener("click", async () => {
     resetEditor();
     await renderPosts({ editable: true });
   } catch (error) {
-    alert(`공지 삭제 실패: ${error.message}`);
+    alert(adminErrorMessage("공지 삭제", error));
   }
 });
 
@@ -416,7 +431,7 @@ sectionForm.addEventListener("submit", async (event) => {
     resetSectionEditor();
     await refreshCustomAdminPreview();
   } catch (error) {
-    alert(`섹션 저장 실패: ${error.message}`);
+    alert(adminErrorMessage("섹션 저장", error));
   } finally {
     submitSection.disabled = false;
   }
@@ -448,7 +463,7 @@ sectionList.addEventListener("click", async (event) => {
       if (editingSectionId === id) resetSectionEditor();
       await refreshCustomAdminPreview();
     } catch (error) {
-      alert(`섹션 삭제 실패: ${error.message}`);
+      alert(adminErrorMessage("섹션 삭제", error));
     }
   }
 });
@@ -477,7 +492,7 @@ customEntryForm.addEventListener("submit", async (event) => {
     resetEntryEditor();
     await refreshCustomAdminPreview();
   } catch (error) {
-    alert(`콘텐츠 저장 실패: ${error.message}`);
+    alert(adminErrorMessage("콘텐츠 저장", error));
   } finally {
     submitEntry.disabled = false;
   }
@@ -497,7 +512,7 @@ noticeList.addEventListener("click", async (event) => {
       if (editingId === id) resetEditor();
       await renderPosts({ editable: true });
     } catch (error) {
-      alert(`공지 삭제 실패: ${error.message}`);
+      alert(adminErrorMessage("공지 삭제", error));
     }
   }
 
@@ -526,7 +541,7 @@ studioGrid.addEventListener("click", async (event) => {
       if (editingStudioId === id) resetStudioEditor();
       await renderStudioNotes({ editable: true });
     } catch (error) {
-      alert(`스튜디오 노트 삭제 실패: ${error.message}`);
+      alert(adminErrorMessage("스튜디오 노트 삭제", error));
     }
   }
 
@@ -556,7 +571,7 @@ customSections.addEventListener("click", async (event) => {
       if (editingEntryId === id) resetEntryEditor();
       await refreshCustomAdminPreview();
     } catch (error) {
-      alert(`콘텐츠 삭제 실패: ${error.message}`);
+      alert(adminErrorMessage("콘텐츠 삭제", error));
     }
   }
 
