@@ -4,6 +4,23 @@ const STUDIO_NOTES_KEY = "bacon-cake-studio-notes";
 const ADMIN_TOKEN_KEY = "bacon-cake-supabase-token";
 const ADMIN_REFRESH_KEY = "bacon-cake-supabase-refresh";
 const LANGUAGE_KEY = "bacon-cake-language";
+const CANONICAL_ORIGIN = "https://leeminseok8063.github.io";
+const CANONICAL_BASE_PATH = "/BaconCakeSite";
+const STALE_CUSTOM_DOMAINS = new Set(["baconcakeofficialgames.com", "www.baconcakeofficialgames.com"]);
+
+function canonicalUrl(path = "index.html") {
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${CANONICAL_ORIGIN}${CANONICAL_BASE_PATH}${cleanPath}`;
+}
+
+function redirectStaleCustomDomain() {
+  if (!STALE_CUSTOM_DOMAINS.has(window.location.hostname)) return;
+
+  const path = window.location.pathname === "/" ? "/index.html" : window.location.pathname;
+  window.location.replace(`${CANONICAL_ORIGIN}${CANONICAL_BASE_PATH}${path}${window.location.search}${window.location.hash}`);
+}
+
+redirectStaleCustomDomain();
 
 const translations = {
   ko: {
@@ -524,7 +541,7 @@ function setupAdminLogin() {
       return;
     }
 
-    window.location.href = "admin.html";
+    window.location.href = canonicalUrl("admin.html");
   });
 }
 

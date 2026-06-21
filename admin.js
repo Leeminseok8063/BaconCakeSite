@@ -25,7 +25,7 @@ let editingStudioId = null;
 async function requireAdminSession() {
   const user = await fetchAdminUser();
   if (!user) {
-    window.location.replace("index.html");
+    window.location.replace(canonicalUrl("index.html"));
     return false;
   }
 
@@ -164,7 +164,7 @@ resetSettings.addEventListener("click", () => {
 
 adminLogout.addEventListener("click", async () => {
   clearAdminSession();
-  window.location.href = "index.html";
+  window.location.href = canonicalUrl("index.html");
 });
 
 studioForm.addEventListener("submit", async (event) => {
