@@ -50,8 +50,7 @@ async function requireAdminSession() {
   return true;
 }
 
-function fillSettingsForm() {
-  const settings = loadSettings();
+function fillSettingsForm(settings = loadSettings()) {
   Object.entries(settings).forEach(([key, value]) => {
     const field = settingsForm.querySelector(`#${key}`);
     if (field) field.value = value;
@@ -284,7 +283,7 @@ async function refreshCustomAdminPreview() {
   await renderCustomSections({ editable: true });
 }
 
-settingsForm.addEventListener("submit", (event) => {
+settingsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const settings = Object.keys(defaultSettings).reduce((nextSettings, key) => {
     const field = settingsForm.querySelector(`#${key}`);
@@ -292,15 +291,23 @@ settingsForm.addEventListener("submit", (event) => {
     return nextSettings;
   }, {});
 
-  saveSettings(settings);
-  applySettings();
-  fillSettingsForm();
+  try {
+    await persistSiteSettings(settings);
+    applySettings(settings);
+    fillSettingsForm(settings);
+  } catch (error) {
+    alert(`사이트 문구 저장 실패: ${error.message}`);
+  }
 });
 
-resetSettings.addEventListener("click", () => {
-  saveSettings(defaultSettings);
-  applySettings();
-  fillSettingsForm();
+resetSettings.addEventListener("click", async () => {
+  try {
+    await persistSiteSettings(defaultSettings);
+    applySettings(defaultSettings);
+    fillSettingsForm(defaultSettings);
+  } catch (error) {
+    alert(`기본값 저장 실패: ${error.message}`);
+  }
 });
 
 adminLogout.addEventListener("click", async () => {
@@ -572,7 +579,9 @@ async function initAdmin() {
   const isAdmin = await requireAdminSession();
   if (!isAdmin) return;
 
-  fillSettingsForm();
+  const settings = await fetchSiteSettings();
+  fillSettingsForm(settings);
+  applySettings(settings);
   resetStudioEditor();
   resetSectionEditor();
   resetEntryEditor();

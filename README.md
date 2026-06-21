@@ -105,6 +105,30 @@ using (true)
 with check (true);
 ```
 
+사이트 문구와 개인정보 처리방침을 어드민 콘솔에서 업데이트하려면 아래 SQL도 실행해야 합니다. 일반 방문자는 읽기만 가능하고, 로그인한 관리자만 수정할 수 있습니다.
+
+```sql
+create table if not exists public.site_settings (
+  id text primary key,
+  settings jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.site_settings enable row level security;
+
+create policy "Anyone can read site settings"
+on public.site_settings
+for select
+using (true);
+
+create policy "Authenticated users can manage site settings"
+on public.site_settings
+for all
+to authenticated
+using (true)
+with check (true);
+```
+
 ## GitHub Pages
 
 이 프로젝트는 정적 사이트라 GitHub Pages에 바로 배포할 수 있습니다.

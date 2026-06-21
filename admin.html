@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BaconCake Root Console</title>
-    <link rel="stylesheet" href="styles.css?v=20260621-2" />
+    <link rel="stylesheet" href="styles.css?v=20260621-3" />
   </head>
   <body class="admin-page">
     <div class="site-shell admin-shell">
@@ -18,6 +18,7 @@
           <a href="#noticeEditor">공지 관리</a>
           <a href="#studioEditor">스튜디오</a>
           <a href="#sectionEditor">섹션</a>
+          <a href="#privacyEditor">개인정보</a>
         </nav>
         <button
           class="root-button"
@@ -84,6 +85,18 @@
               <label>
                 스튜디오 제목
                 <input id="studioTitle" type="text" required />
+              </label>
+              <label>
+                메뉴 개인정보 이름
+                <input id="privacyNavLabel" type="text" required />
+              </label>
+              <label>
+                개인정보 페이지 제목
+                <input id="privacyTitle" type="text" required />
+              </label>
+              <label class="wide-field">
+                <span id="privacyEditor">개인정보 처리방침 본문</span>
+                <textarea id="privacyBody" rows="18" required></textarea>
               </label>
             </div>
             <button class="primary-action" type="submit">사이트 문구 저장</button>
@@ -227,8 +240,8 @@
       </main>
     </div>
 
-    <script src="supabase-config.js?v=20260621-2"></script>
-    <script src="site.js?v=20260621-2"></script>
-    <script src="admin.js?v=20260621-2"></script>
+    <script src="supabase-config.js?v=20260621-3"></script>
+    <script src="site.js?v=20260621-3"></script>
+    <script src="admin.js?v=20260621-3"></script>
   </body>
 </html>

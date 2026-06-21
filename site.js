@@ -8,6 +8,7 @@ const PREVIEW_BODY_LIMIT = 170;
 const CANONICAL_ORIGIN = "https://leeminseok8063.github.io";
 const CANONICAL_BASE_PATH = "/BaconCakeSite";
 const STALE_CUSTOM_DOMAINS = new Set(["baconcakeofficialgames.com", "www.baconcakeofficialgames.com"]);
+const SITE_SETTINGS_ID = "main";
 
 function canonicalUrl(path = "index.html") {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
@@ -119,6 +120,112 @@ const defaultSettings = {
   noticeNavLabel: "공지사항",
   studioEyebrow: "Studio Notes",
   studioTitle: "무엇을 만드는가",
+  privacyNavLabel: "개인정보 처리방침",
+  privacyTitle: "개인정보 처리방침",
+  privacyBody: `BaconCake은 이용자의 개인정보를 중요하게 생각합니다.
+본 개인정보 처리방침은 One More Bite 앱에 적용됩니다.
+
+시행일자: 2026년 6월 21일
+
+1. 개인정보의 처리 목적
+
+BaconCake은 다음 목적을 위해 개인정보를 처리할 수 있습니다.
+
+서비스 제공 및 운영
+랭킹과 점수 표시
+광고 제공
+광고제거 인앱결제 확인
+앱 오류 확인 및 서비스 개선
+부정 이용 방지
+스토어 정책 및 관련 법령 준수
+
+2. 수집 또는 처리될 수 있는 정보
+
+앱 이용 과정에서 다음 정보가 처리될 수 있습니다.
+
+기기 정보
+운영체제 정보
+앱 버전
+국가 또는 지역 정보
+IP 주소
+광고 식별자
+앱 이용 기록
+광고 노출 및 클릭 기록
+오류 및 충돌 정보
+랭킹 점수
+순위 정보
+닉네임 또는 표시 이름
+구매 상품 정보
+구매 상태
+구매 영수증 또는 구매 토큰
+
+BaconCake은 결제 카드번호, 계좌번호 등 결제수단 정보를 직접 수집하지 않습니다.
+결제는 Google Play 또는 Apple App Store를 통해 처리됩니다.
+
+3. 개인정보의 보유 기간
+
+BaconCake은 개인정보를 수집 목적에 필요한 기간 동안 보관합니다.
+
+랭킹 정보는 서비스 제공 기간 동안 보관될 수 있습니다.
+구매 정보는 광고제거 상품 제공과 구매 복원을 위해 필요한 기간 동안 보관될 수 있습니다.
+오류 및 이용 기록은 앱 개선과 부정 이용 방지를 위해 필요한 기간 동안 보관될 수 있습니다.
+
+이용자가 삭제를 요청하는 경우 관련 법령상 보관이 필요한 정보를 제외하고 지체 없이 삭제합니다.
+
+4. 광고 제공
+
+One More Bite는 Google AdMob을 사용하여 광고를 표시할 수 있습니다.
+Google AdMob은 광고 제공, 광고 성과 측정, 부정 광고 방지를 위해 광고 식별자, 기기 정보, IP 주소, 앱 이용 정보 등을 처리할 수 있습니다.
+
+이용자는 기기 설정에서 맞춤형 광고를 제한하거나 광고 식별자를 재설정할 수 있습니다.
+
+5. 인앱결제
+
+One More Bite는 광고제거를 위한 유료 인앱결제 상품을 제공할 수 있습니다.
+구매가 완료되면 앱은 구매 상태를 확인하여 광고제거 기능을 제공합니다.
+결제 처리는 Google Play 또는 Apple App Store에서 진행됩니다.
+
+6. 랭킹 정보
+
+One More Bite는 이용자의 점수와 순위를 랭킹에 표시할 수 있습니다.
+랭킹에는 닉네임 또는 표시 이름, 점수, 순위가 표시될 수 있습니다.
+
+이용자는 랭킹 정보 삭제를 요청할 수 있습니다.
+
+7. 제3자 서비스
+
+앱 운영을 위해 다음 외부 서비스를 사용할 수 있습니다.
+
+Google AdMob
+Google Play 결제
+Apple 인앱결제
+Unity Gaming Services 또는 랭킹 서비스 제공자
+
+각 서비스는 광고 제공, 결제 처리, 구매 확인, 랭킹 제공, 앱 안정성 개선을 위해 필요한 정보를 처리할 수 있습니다.
+
+8. 아동의 개인정보
+
+One More Bite는 만 14세 미만 아동을 주요 대상으로 하지 않습니다.
+만 14세 미만 아동의 개인정보 처리가 필요한 경우 관련 법령에 따라 필요한 조치를 취합니다.
+
+9. 개인정보의 삭제 요청
+
+이용자는 개인정보 열람, 수정, 삭제, 처리 정지를 요청할 수 있습니다.
+랭킹 정보 삭제도 요청할 수 있습니다.
+
+문의 이메일: [문의 이메일]
+
+10. 개인정보 보호책임자
+
+개인정보 보호책임자: BaconCake
+문의 이메일: [문의 이메일]
+
+11. 개인정보 처리방침 변경
+
+본 개인정보 처리방침은 앱 기능, 법령, 스토어 정책 변경에 따라 수정될 수 있습니다.
+변경 사항은 앱 또는 스토어 페이지를 통해 안내할 수 있습니다.
+
+최종 수정일: 2026년 6월 21일`,
 };
 
 const translatedDefaultSettings = {
@@ -354,6 +461,31 @@ function saveSettings(settings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
 
+async function fetchSiteSettings() {
+  if (!window.BACONCAKE_SUPABASE) return loadSettings();
+
+  try {
+    const data = await supabaseRequest(`/site_settings?id=eq.${encodeURIComponent(SITE_SETTINGS_ID)}&select=settings`);
+    const settings = data[0]?.settings ? { ...defaultSettings, ...data[0].settings } : loadSettings();
+    saveSettings(settings);
+    return settings;
+  } catch {
+    return loadSettings();
+  }
+}
+
+async function persistSiteSettings(settings) {
+  saveSettings(settings);
+  if (!window.BACONCAKE_SUPABASE) return;
+
+  await supabaseRequest("/site_settings", {
+    method: "POST",
+    authToken: getStoredAdminToken(),
+    prefer: "resolution=merge-duplicates,return=minimal",
+    body: JSON.stringify({ id: SITE_SETTINGS_ID, settings }),
+  });
+}
+
 function loadStudioNotes() {
   const notes = readJson(STUDIO_NOTES_KEY, defaultStudioNotes);
   let changed = false;
@@ -487,8 +619,7 @@ function renderAlbumCard(item, { editable = false, actions = "", detailType = "c
   return `<a class="card-link" href="${itemDetailUrl(detailType, item.id)}">${content}</a>`;
 }
 
-function applySettings() {
-  const settings = loadSettings();
+function applySettings(settings = loadSettings()) {
   const language = getCurrentLanguage();
   const languageDefaults = translatedDefaultSettings[language] || {};
   document.title = document.body.classList.contains("admin-page") ? "BaconCake Root Console" : settings.siteTitle;
@@ -499,6 +630,17 @@ function applySettings() {
       element.textContent = translatedValue;
     });
   });
+
+  renderPrivacyPolicy(settings);
+}
+
+function renderPrivacyPolicy(settings = loadSettings()) {
+  const privacyTitle = document.querySelector("#privacyTitle");
+  const privacyBody = document.querySelector("#privacyBody");
+  if (!privacyTitle || !privacyBody) return;
+
+  privacyTitle.textContent = settings.privacyTitle || defaultSettings.privacyTitle;
+  privacyBody.textContent = settings.privacyBody || defaultSettings.privacyBody;
 }
 
 async function renderPosts({ editable = false } = {}) {
@@ -668,7 +810,8 @@ function applyStaticTranslations() {
 }
 
 async function refreshTranslatedContent() {
-  applySettings();
+  const settings = await fetchSiteSettings();
+  applySettings(settings);
   applyStaticTranslations();
   await renderPosts({ editable: document.body.classList.contains("admin-page") });
   await renderStudioNotes({ editable: document.body.classList.contains("admin-page") });
@@ -708,10 +851,17 @@ function setupLanguageSwitcher() {
   updateActiveLanguage();
 }
 
-applySettings();
-applyStaticTranslations();
-renderPosts();
-renderStudioNotes();
-renderCustomSections();
-setupAdminLogin();
-setupLanguageSwitcher();
+async function initSite() {
+  applySettings();
+  applyStaticTranslations();
+  renderPosts();
+  renderStudioNotes();
+  renderCustomSections();
+  setupAdminLogin();
+  setupLanguageSwitcher();
+
+  const settings = await fetchSiteSettings();
+  applySettings(settings);
+}
+
+initSite();

@@ -557,9 +557,15 @@ a {
 }
 
 .legal-page p,
-.legal-page li {
+.legal-page li,
+.legal-body {
   font-size: 1.02rem;
   font-weight: 650;
+}
+
+.legal-body {
+  line-height: 1.85;
+  white-space: pre-wrap;
 }
 
 .legal-page ul {
@@ -611,7 +617,7 @@ a {
 
   .main-nav {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
 
   .hero {
