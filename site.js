@@ -445,11 +445,12 @@ function setupAdminLogin() {
   const adminOpen = document.querySelector("#adminOpen");
   const adminDialog = document.querySelector("#adminDialog");
   const adminLoginForm = document.querySelector("#adminLoginForm");
+  const adminDialogClose = document.querySelector("#adminDialogClose");
   const adminEmail = document.querySelector("#adminEmail");
   const adminPassword = document.querySelector("#adminPassword");
   const adminLoginMessage = document.querySelector("#adminLoginMessage");
 
-  if (!adminOpen || !adminDialog || !adminLoginForm || !adminEmail || !adminPassword || !adminLoginMessage) return;
+  if (!adminOpen || !adminDialog || !adminLoginForm || !adminDialogClose || !adminEmail || !adminPassword || !adminLoginMessage) return;
 
   adminOpen.addEventListener("click", () => {
     adminEmail.value = "";
@@ -464,6 +465,10 @@ function setupAdminLogin() {
     adminEmail.focus();
   });
 
+  adminDialogClose.addEventListener("click", () => {
+    adminDialog.close();
+  });
+
   adminLoginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -471,7 +476,7 @@ function setupAdminLogin() {
     try {
       await signInAdmin(adminEmail.value.trim(), adminPassword.value);
     } catch (error) {
-      adminLoginMessage.textContent = t("adminLoginFailure");
+      adminLoginMessage.textContent = `${t("adminLoginFailure")} (${error.message})`;
       return;
     }
 
