@@ -56,6 +56,55 @@ begin
 end $$;
 ```
 
+관리자 콘솔에서 직접 새 섹션을 만들려면 아래 SQL도 함께 실행해야 합니다. 섹션은 `article`(작문형) 또는 `album`(앨범형)을 선택할 수 있습니다.
+
+```sql
+create table if not exists public.content_sections (
+  id uuid primary key default gen_random_uuid(),
+  eyebrow text,
+  title text not null,
+  layout text not null default 'article' check (layout in ('article', 'album')),
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.content_entries (
+  id uuid primary key default gen_random_uuid(),
+  section_id uuid not null references public.content_sections(id) on delete cascade,
+  number text,
+  title text not null,
+  body text not null,
+  media_items jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+alter table public.content_sections enable row level security;
+alter table public.content_entries enable row level security;
+
+create policy "Anyone can read content sections"
+on public.content_sections
+for select
+using (true);
+
+create policy "Anyone can read content entries"
+on public.content_entries
+for select
+using (true);
+
+create policy "Authenticated users can manage content sections"
+on public.content_sections
+for all
+to authenticated
+using (true)
+with check (true);
+
+create policy "Authenticated users can manage content entries"
+on public.content_entries
+for all
+to authenticated
+using (true)
+with check (true);
+```
+
 ## GitHub Pages
 
 이 프로젝트는 정적 사이트라 GitHub Pages에 바로 배포할 수 있습니다.

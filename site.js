@@ -4,6 +4,7 @@ const STUDIO_NOTES_KEY = "bacon-cake-studio-notes";
 const ADMIN_TOKEN_KEY = "bacon-cake-supabase-token";
 const ADMIN_REFRESH_KEY = "bacon-cake-supabase-refresh";
 const LANGUAGE_KEY = "bacon-cake-language";
+const PREVIEW_BODY_LIMIT = 170;
 const CANONICAL_ORIGIN = "https://leeminseok8063.github.io";
 const CANONICAL_BASE_PATH = "/BaconCakeSite";
 const STALE_CUSTOM_DOMAINS = new Set(["baconcakeofficialgames.com", "www.baconcakeofficialgames.com"]);
@@ -192,6 +193,12 @@ function loadPosts() {
   return readJson(POSTS_KEY, defaultPosts);
 }
 
+function truncateText(value, limit = PREVIEW_BODY_LIMIT) {
+  const text = value || "";
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit).trim()}...`;
+}
+
 function getStoredAdminToken() {
   return localStorage.getItem(ADMIN_TOKEN_KEY);
 }
@@ -281,6 +288,46 @@ async function fetchPosts() {
     createdAt: post.created_at,
     mediaItems: post.media_items || [],
   }));
+}
+
+async function fetchCustomSections() {
+  if (!window.BACONCAKE_SUPABASE) return [];
+
+  try {
+    return await supabaseRequest("/content_sections?select=id,eyebrow,title,layout,created_at&order=created_at.asc");
+  } catch {
+    return [];
+  }
+}
+
+async function fetchCustomEntries(sectionId) {
+  if (!window.BACONCAKE_SUPABASE) return [];
+
+  const sectionFilter = sectionId ? `&section_id=eq.${encodeURIComponent(sectionId)}` : "";
+  try {
+    const data = await supabaseRequest(`/content_entries?select=id,section_id,number,title,body,media_items,created_at${sectionFilter}&order=created_at.desc`);
+    return data.map((entry) => ({
+      ...entry,
+      mediaItems: entry.media_items || [],
+      createdAt: entry.created_at,
+    }));
+  } catch {
+    try {
+      const data = await supabaseRequest(`/content_entries?select=id,section_id,number,title,body,created_at${sectionFilter}&order=created_at.desc`);
+      return data.map((entry) => ({
+        ...entry,
+        mediaItems: [],
+        createdAt: entry.created_at,
+      }));
+    } catch {
+      return [];
+    }
+  }
+}
+
+async function fetchCustomEntry(id) {
+  const entries = await fetchCustomEntries();
+  return entries.find((entry) => entry.id === id);
 }
 
 function savePosts(posts) {
@@ -396,6 +443,38 @@ function renderMediaItems(mediaItems = []) {
   </div>`;
 }
 
+function renderArticleCard(item, { editable = false, actions = "", detailType = "custom" } = {}) {
+  const content = `<article class="notice-card">
+    <header>
+      <div>
+        <h3>${escapeHtml(item.title)}</h3>
+        ${item.created_at || item.createdAt ? `<time datetime="${item.created_at || item.createdAt}">${formatDate(item.created_at || item.createdAt)}</time>` : ""}
+      </div>
+      ${actions}
+    </header>
+    <p>${escapeHtml(truncateText(item.body))}</p>
+    ${renderMediaItems((item.media_items || item.mediaItems || []).slice(0, 1))}
+  </article>`;
+
+  if (editable) return content;
+  return `<a class="card-link" href="${itemDetailUrl(detailType, item.id)}">${content}</a>`;
+}
+
+function renderAlbumCard(item, { editable = false, actions = "", detailType = "custom" } = {}) {
+  const content = `<article>
+    <header>
+      <span>${escapeHtml(item.number || "ITEM")}</span>
+      ${actions}
+    </header>
+    <h3>${escapeHtml(item.title)}</h3>
+    <p>${escapeHtml(truncateText(item.body, 120))}</p>
+    ${renderMediaItems((item.media_items || item.mediaItems || []).slice(0, 1))}
+  </article>`;
+
+  if (editable) return content;
+  return `<a class="card-link" href="${itemDetailUrl(detailType, item.id)}">${content}</a>`;
+}
+
 function applySettings() {
   const settings = loadSettings();
   const language = getCurrentLanguage();
@@ -440,20 +519,7 @@ async function renderPosts({ editable = false } = {}) {
           </div>`
         : "";
 
-      const content = `<article class="notice-card">
-        <header>
-          <div>
-            <h3>${escapeHtml(post.title)}</h3>
-            <time datetime="${post.createdAt}">${formatDate(post.createdAt)}</time>
-          </div>
-          ${actions}
-        </header>
-        <p>${escapeHtml(post.body)}</p>
-        ${renderMediaItems(post.mediaItems)}
-      </article>`;
-
-      if (editable) return content;
-      return `<a class="card-link" href="${itemDetailUrl("notice", post.id)}">${content}</a>`;
+      return renderArticleCard(post, { editable, actions, detailType: "notice" });
     })
     .join("");
 }
@@ -486,20 +552,54 @@ async function renderStudioNotes({ editable = false } = {}) {
           </div>`
         : "";
 
-      const content = `<article>
-        <header>
-          <span>${escapeHtml(note.number)}</span>
-          ${actions}
-        </header>
-        <h3>${escapeHtml(note.title)}</h3>
-        <p>${escapeHtml(note.body)}</p>
-        ${renderMediaItems(note.mediaItems)}
-      </article>`;
-
-      if (editable) return content;
-      return `<a class="card-link" href="${itemDetailUrl("studio", note.id)}">${content}</a>`;
+      return renderAlbumCard(note, { editable, actions, detailType: "studio" });
     })
     .join("");
+}
+
+async function renderCustomSections({ editable = false } = {}) {
+  const customSections = document.querySelector("#customSections");
+  if (!customSections) return;
+
+  const sections = await fetchCustomSections();
+  if (!sections.length) {
+    customSections.innerHTML = "";
+    return;
+  }
+
+  const rendered = await Promise.all(
+    sections.map(async (section) => {
+      const entries = await fetchCustomEntries(section.id);
+      const layoutClass = section.layout === "album" ? "studio-section" : "section-grid";
+      const listClass = section.layout === "album" ? "studio-grid" : "notice-list";
+      const cards = entries.length
+        ? entries
+            .map((entry) => {
+              const actions = editable
+                ? `<div class="notice-actions">
+                    <button type="button" data-action="edit-entry" data-id="${entry.id}">${t("edit")}</button>
+                    <button type="button" data-action="delete-entry" data-id="${entry.id}">${t("delete")}</button>
+                  </div>`
+                : "";
+
+              return section.layout === "album"
+                ? renderAlbumCard(entry, { editable, actions, detailType: "custom" })
+                : renderArticleCard(entry, { editable, actions, detailType: "custom" });
+            })
+            .join("")
+        : `<article class="notice-card"><h3>등록된 콘텐츠가 없습니다.</h3><p>관리자 콘솔에서 콘텐츠를 추가하세요.</p></article>`;
+
+      return `<section class="${layoutClass}" id="section-${section.id}">
+        <div class="section-heading">
+          <p class="eyebrow">${escapeHtml(section.eyebrow || "")}</p>
+          <h2>${escapeHtml(section.title)}</h2>
+        </div>
+        <div class="${listClass}" data-section-id="${section.id}" data-layout="${section.layout}">${cards}</div>
+      </section>`;
+    }),
+  );
+
+  customSections.innerHTML = rendered.join("");
 }
 
 function setupAdminLogin() {
@@ -560,6 +660,7 @@ async function refreshTranslatedContent() {
   applyStaticTranslations();
   await renderPosts({ editable: document.body.classList.contains("admin-page") });
   await renderStudioNotes({ editable: document.body.classList.contains("admin-page") });
+  await renderCustomSections({ editable: document.body.classList.contains("admin-page") });
 
   if (typeof renderDetail === "function") {
     await renderDetail();
@@ -599,5 +700,6 @@ applySettings();
 applyStaticTranslations();
 renderPosts();
 renderStudioNotes();
+renderCustomSections();
 setupAdminLogin();
 setupLanguageSwitcher();

@@ -17,6 +17,7 @@
           <a href="index.html">일반 사이트</a>
           <a href="#noticeEditor">공지 관리</a>
           <a href="#studioEditor">스튜디오</a>
+          <a href="#sectionEditor">섹션</a>
         </nav>
         <button
           class="root-button"
@@ -141,6 +142,69 @@
               <button class="secondary-action hidden" id="cancelEdit" type="button">수정 취소</button>
             </div>
           </form>
+
+          <form class="admin-panel" id="sectionForm">
+            <div class="panel-title">
+              <span id="sectionEditor">섹션 만들기</span>
+              <button id="cancelSectionEdit" class="secondary-action hidden" type="button">수정 취소</button>
+            </div>
+            <div class="settings-grid">
+              <label>
+                작은 글씨
+                <input id="sectionEyebrow" type="text" placeholder="예: Dev Log" required />
+              </label>
+              <label>
+                섹션 제목
+                <input id="sectionTitle" type="text" placeholder="예: 개발 일지" required />
+              </label>
+              <label>
+                형태
+                <select id="sectionLayout" required>
+                  <option value="article">작문형</option>
+                  <option value="album">앨범형</option>
+                </select>
+              </label>
+            </div>
+            <button class="primary-action" id="submitSection" type="submit">섹션 등록</button>
+          </form>
+
+          <div class="admin-panel">
+            <div class="panel-title">
+              <span>섹션 목록</span>
+            </div>
+            <div class="section-admin-list" id="sectionList"></div>
+          </div>
+
+          <form class="admin-panel" id="customEntryForm">
+            <div class="panel-title">
+              <span>섹션 콘텐츠 작성</span>
+              <button id="cancelEntryEdit" class="secondary-action hidden" type="button">수정 취소</button>
+            </div>
+            <div class="settings-grid">
+              <label>
+                섹션 선택
+                <select id="entrySection" required></select>
+              </label>
+              <label>
+                번호/라벨
+                <input id="entryNumber" type="text" placeholder="앨범형에서 예: 01" />
+              </label>
+              <label>
+                제목
+                <input id="entryTitle" type="text" placeholder="콘텐츠 제목" required />
+              </label>
+              <label class="wide-field">
+                내용
+                <textarea id="entryBody" rows="10" placeholder="긴 글도 제한 없이 작성할 수 있습니다." required></textarea>
+              </label>
+              <label class="wide-field">
+                첨부 파일
+                <input id="entryMedia" type="file" accept="image/*,video/*,audio/*,application/pdf" multiple />
+                <small>이미지, 동영상, 오디오, PDF를 여러 개 첨부할 수 있습니다.</small>
+              </label>
+            </div>
+            <button class="primary-action" id="submitEntry" type="submit">콘텐츠 등록</button>
+          </form>
         </section>
 
         <section class="section-grid">
@@ -158,6 +222,8 @@
           </div>
           <div class="studio-grid" id="studioGrid"></div>
         </section>
+
+        <div id="customSections"></div>
       </main>
     </div>
 

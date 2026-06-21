@@ -21,6 +21,14 @@ async function renderDetail() {
     backHref = "index.html#studio";
   }
 
+  if (type === "custom") {
+    item = await fetchCustomEntry(id);
+    const sections = await fetchCustomSections();
+    const section = sections.find((candidate) => candidate.id === item?.section_id);
+    label = section?.title || "Content";
+    backHref = section ? `index.html#section-${section.id}` : "index.html";
+  }
+
   if (!item) {
     detailView.innerHTML = `<article class="detail-card">
       <p class="eyebrow">${t("notFoundLabel")}</p>
