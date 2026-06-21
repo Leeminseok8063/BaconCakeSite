@@ -111,6 +111,10 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function itemDetailUrl(type, id) {
+  return `detail.html?type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}`;
+}
+
 function escapeHtml(value) {
   const div = document.createElement("div");
   div.textContent = value;
@@ -148,7 +152,7 @@ function renderPosts({ editable = false } = {}) {
           </div>`
         : "";
 
-      return `<article class="notice-card">
+      const content = `<article class="notice-card">
         <header>
           <div>
             <h3>${escapeHtml(post.title)}</h3>
@@ -158,6 +162,9 @@ function renderPosts({ editable = false } = {}) {
         </header>
         <p>${escapeHtml(post.body)}</p>
       </article>`;
+
+      if (editable) return content;
+      return `<a class="card-link" href="${itemDetailUrl("notice", post.id)}">${content}</a>`;
     })
     .join("");
 }
@@ -181,7 +188,7 @@ function renderStudioNotes({ editable = false } = {}) {
           </div>`
         : "";
 
-      return `<article>
+      const content = `<article>
         <header>
           <span>${escapeHtml(note.number)}</span>
           ${actions}
@@ -189,6 +196,9 @@ function renderStudioNotes({ editable = false } = {}) {
         <h3>${escapeHtml(note.title)}</h3>
         <p>${escapeHtml(note.body)}</p>
       </article>`;
+
+      if (editable) return content;
+      return `<a class="card-link" href="${itemDetailUrl("studio", note.id)}">${content}</a>`;
     })
     .join("");
 }

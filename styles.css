@@ -343,6 +343,29 @@ a {
   padding: 18px;
 }
 
+.card-link {
+  display: block;
+}
+
+.card-link .notice-card,
+.card-link article {
+  transition:
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.card-link:focus-visible {
+  border-radius: 8px;
+  outline: 4px solid rgba(231, 53, 45, 0.36);
+  outline-offset: 4px;
+}
+
+.card-link:hover .notice-card,
+.card-link:hover article {
+  box-shadow: 0 12px 28px rgba(89, 31, 0, 0.16);
+  transform: translateY(-2px);
+}
+
 .notice-card {
   display: grid;
   gap: 12px;
@@ -403,6 +426,44 @@ a {
 
 .wide-field {
   grid-column: span 2;
+}
+
+.detail-section {
+  margin: 70px auto 32px;
+  max-width: 920px;
+}
+
+.detail-card {
+  background: var(--panel);
+  border: 3px solid rgba(51, 17, 9, 0.14);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 5vw, 44px);
+}
+
+.detail-card h1 {
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.detail-card p:not(.eyebrow) {
+  font-size: clamp(1.05rem, 2vw, 1.28rem);
+  font-weight: 750;
+  line-height: 1.8;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.detail-meta {
+  color: var(--red-dark);
+  font-weight: 900;
+}
+
+.detail-card .secondary-action {
+  justify-self: start;
 }
 
 @media (max-width: 820px) {
