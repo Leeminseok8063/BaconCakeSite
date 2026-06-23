@@ -107,7 +107,7 @@ function adminErrorMessage(action, error) {
   const lowerMessage = message.toLowerCase();
 
   if (message.includes('"statusCode":"413"') || lowerMessage.includes("payload too large") || lowerMessage.includes("maximum allowed size")) {
-    return action + " 실패: 첨부 파일이 너무 큽니다. 동영상은 " + MAX_MEDIA_FILE_SIZE_LABEL + " 이하로 압축해서 다시 올려주세요.";
+    return action + " 실패: Supabase Storage가 첨부 파일을 서버 제한으로 거절했습니다. " + MAX_MEDIA_FILE_SIZE_LABEL + " 이하 파일도 Supabase 버킷 설정이 아직 적용되지 않았으면 실패할 수 있습니다. Supabase SQL Editor에서 supabase-setup.sql을 다시 실행해주세요.";
   }
 
   if (message.includes('"code":"42501"') || lowerMessage.includes("row-level security")) {
@@ -152,7 +152,7 @@ async function uploadMediaFiles(files, folder) {
 
       if (!response.ok) {
         const message = await response.text();
-        throw new Error(message || `파일 업로드 실패: ${file.name}`);
+        throw new Error((message || "파일 업로드 실패") + " (파일: " + file.name + ", 크기: " + formatFileSize(file.size) + ")");
       }
 
       return {
