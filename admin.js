@@ -22,6 +22,8 @@ const customSections = document.querySelector("#customSections");
 
 let editingSectionId = null;
 let editingEntryId = null;
+const MAX_MEDIA_FILE_SIZE_BYTES = 500 * 1024 * 1024;
+const MAX_MEDIA_FILE_SIZE_LABEL = "500MB";
 
 async function requireAdminSession() {
   const user = await fetchAdminUser();
@@ -71,6 +73,12 @@ function safeFileName(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "-") || "file";
 }
 
+function formatFileSize(bytes) {
+  if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + "MB";
+  if (bytes >= 1024) return (bytes / 1024).toFixed(1) + "KB";
+  return bytes + "B";
+}
+
 function storageBaseUrl() {
   if (BACONCAKE_SUPABASE.storageUrl) return BACONCAKE_SUPABASE.storageUrl;
   return BACONCAKE_SUPABASE.restUrl.replace("/rest/v1", "/storage/v1");
@@ -98,6 +106,10 @@ function adminErrorMessage(action, error) {
   const message = error?.message || String(error);
   const lowerMessage = message.toLowerCase();
 
+  if (message.includes('"statusCode":"413"') || lowerMessage.includes("payload too large") || lowerMessage.includes("maximum allowed size")) {
+    return action + " 실패: 첨부 파일이 너무 큽니다. 동영상은 " + MAX_MEDIA_FILE_SIZE_LABEL + " 이하로 압축해서 다시 올려주세요.";
+  }
+
   if (message.includes('"code":"42501"') || lowerMessage.includes("row-level security")) {
     return `${action} 실패: Supabase RLS 정책이 아직 맞지 않습니다. Supabase SQL Editor에서 supabase-setup.sql 전체를 다시 실행한 뒤, 관리자에서 로그아웃 후 재로그인해주세요.`;
   }
@@ -118,6 +130,11 @@ async function uploadMediaFiles(files, folder) {
   const uploads = [...files];
   if (!uploads.length) return [];
   if (!token) throw new Error("관리자 로그인 세션이 없습니다. 다시 로그인해주세요.");
+
+  const oversizedFile = uploads.find((file) => file.size > MAX_MEDIA_FILE_SIZE_BYTES);
+  if (oversizedFile) {
+    throw new Error(oversizedFile.name + " 파일이 너무 큽니다. 현재 " + formatFileSize(oversizedFile.size) + "이며, 첨부 파일은 " + MAX_MEDIA_FILE_SIZE_LABEL + " 이하만 업로드할 수 있습니다.");
+  }
 
   return Promise.all(
     uploads.map(async (file) => {

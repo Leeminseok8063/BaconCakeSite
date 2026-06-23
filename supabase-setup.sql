@@ -104,9 +104,31 @@ to authenticated
 using (true)
 with check (true);
 
-insert into storage.buckets (id, name, public)
-values ('content-media', 'content-media', true)
-on conflict (id) do update set public = true;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'content-media',
+  'content-media',
+  true,
+  524288000,
+  array[
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'video/mp4',
+    'video/quicktime',
+    'video/webm',
+    'audio/mpeg',
+    'audio/mp4',
+    'audio/wav',
+    'audio/webm',
+    'application/pdf'
+  ]
+)
+on conflict (id) do update set
+  public = true,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "Anyone can read content media" on storage.objects;
 drop policy if exists "Authenticated users can upload content media" on storage.objects;
