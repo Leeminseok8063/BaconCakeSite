@@ -14,6 +14,7 @@ const entrySection = document.querySelector("#entrySection");
 const entryNumber = document.querySelector("#entryNumber");
 const entryTitle = document.querySelector("#entryTitle");
 const entrySlug = document.querySelector("#entrySlug");
+const entryExternalUrl = document.querySelector("#entryExternalUrl");
 const entryBody = document.querySelector("#entryBody");
 const entryMedia = document.querySelector("#entryMedia");
 const submitEntry = document.querySelector("#submitEntry");
@@ -98,8 +99,40 @@ function encodeStoragePath(path) {
 
 function contentPayload(fields, mediaItems) {
   const payload = { ...fields };
-  if (mediaItems.length) payload.media_items = mediaItems;
+  if (Array.isArray(mediaItems)) payload.media_items = mediaItems;
   return payload;
+}
+
+function normalizeExternalUrl(value) {
+  const rawValue = value.trim();
+  if (!rawValue) return "";
+  const withProtocol = /^[a-z][a-z0-9+.-]*:/i.test(rawValue) ? rawValue : `https://${rawValue}`;
+
+  try {
+    const url = new URL(withProtocol);
+    if (!["http:", "https:"].includes(url.protocol)) throw new Error();
+    return url.href;
+  } catch {
+    throw new Error("외부 링크는 https://example.com 형식의 올바른 주소로 입력해주세요.");
+  }
+}
+
+function externalLinkItem(url) {
+  return url ? { name: "외부 링크", type: "external-link", url } : null;
+}
+
+function withoutExternalLink(mediaItems = []) {
+  return mediaItems.filter((item) => item.type !== "external-link");
+}
+
+function findExternalLink(mediaItems = []) {
+  return mediaItems.find((item) => item.type === "external-link")?.url || "";
+}
+
+function mergeMediaWithExternalLink(mediaItems, externalUrl) {
+  const cleanMediaItems = withoutExternalLink(mediaItems);
+  const linkItem = externalLinkItem(externalUrl);
+  return linkItem ? [...cleanMediaItems, linkItem] : cleanMediaItems;
 }
 
 function adminErrorMessage(action, error) {
@@ -402,9 +435,11 @@ customEntryForm.addEventListener("submit", async (event) => {
 
   try {
     submitEntry.disabled = true;
+    const externalUrl = normalizeExternalUrl(entryExternalUrl.value);
     const existingEntry = editingEntryId ? await fetchCustomEntry(editingEntryId) : null;
+    const existingMediaItems = withoutExternalLink(existingEntry?.mediaItems || existingEntry?.media_items || []);
     const uploadedMedia = await uploadMediaFiles(entryMedia.files, "custom-sections");
-    const mediaItems = [...(existingEntry?.mediaItems || existingEntry?.media_items || []), ...uploadedMedia];
+    const mediaItems = mergeMediaWithExternalLink([...existingMediaItems, ...uploadedMedia], externalUrl);
 
     if (editingEntryId) {
       await updateCustomEntry(editingEntryId, sectionId, number, title, slug, body, mediaItems);
@@ -448,6 +483,7 @@ customSections.addEventListener("click", async (event) => {
     entryNumber.value = entry.number || "";
     entryTitle.value = entry.title;
     entrySlug.value = entry.slug || "";
+    entryExternalUrl.value = findExternalLink(entry.mediaItems || entry.media_items || []);
     entryBody.value = entry.body;
     submitEntry.textContent = "수정 저장";
     cancelEntryEdit.classList.remove("hidden");

@@ -363,11 +363,20 @@ function escapeHtml(value) {
   return div.innerHTML;
 }
 
+function mediaItemsWithoutExternalLinks(mediaItems = []) {
+  return mediaItems.filter((item) => item.type !== "external-link");
+}
+
+function findExternalLink(mediaItems = []) {
+  return mediaItems.find((item) => item.type === "external-link")?.url || "";
+}
+
 function renderMediaItems(mediaItems = []) {
-  if (!mediaItems.length) return "";
+  const visibleMediaItems = mediaItemsWithoutExternalLinks(mediaItems);
+  if (!visibleMediaItems.length) return "";
 
   return `<div class="media-list">
-    ${mediaItems
+    ${visibleMediaItems
       .map((item) => {
         const url = escapeHtml(item.url);
         const name = escapeHtml(item.name || "첨부 파일");
@@ -409,6 +418,8 @@ function renderArticleCard(item, { editable = false, actions = "", detailType = 
 }
 
 function renderAlbumCard(item, { editable = false, actions = "", detailType = "custom" } = {}) {
+  const mediaItems = item.media_items || item.mediaItems || [];
+  const externalUrl = findExternalLink(mediaItems);
   const content = `<article>
     <header>
       <span>${escapeHtml(item.number || "항목")}</span>
@@ -416,10 +427,11 @@ function renderAlbumCard(item, { editable = false, actions = "", detailType = "c
     </header>
     <h3>${escapeHtml(item.title)}</h3>
     <p>${escapeHtml(truncateText(item.body, 120))}</p>
-    ${renderMediaItems((item.media_items || item.mediaItems || []).slice(0, 1))}
+    ${renderMediaItems(mediaItems.slice(0, 1))}
   </article>`;
 
   if (editable) return content;
+  if (externalUrl) return `<a class="card-link" href="${escapeHtml(externalUrl)}" target="_blank" rel="noreferrer">${content}</a>`;
   return `<a class="card-link" href="${itemDetailUrl(detailType, item)}">${content}</a>`;
 }
 
