@@ -363,6 +363,33 @@ function escapeHtml(value) {
   return div.innerHTML;
 }
 
+function isSafeLinkUrl(value) {
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol);
+  } catch {
+    return false;
+  }
+}
+
+function renderMarkdownLinks(value) {
+  const text = value || "";
+  const linkPattern = /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/gi;
+  let html = "";
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(linkPattern)) {
+    const [source, label, url] = match;
+    html += escapeHtml(text.slice(lastIndex, match.index));
+    html += isSafeLinkUrl(url)
+      ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`
+      : escapeHtml(source);
+    lastIndex = match.index + source.length;
+  }
+
+  return html + escapeHtml(text.slice(lastIndex));
+}
+
 function mediaItemsWithoutExternalLinks(mediaItems = []) {
   return mediaItems.filter((item) => item.type !== "external-link");
 }

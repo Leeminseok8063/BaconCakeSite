@@ -532,12 +532,25 @@ a {
   margin: 0;
 }
 
-.detail-card p:not(.eyebrow) {
+.detail-card p:not(.eyebrow),
+.detail-body {
   font-size: clamp(1.05rem, 2vw, 1.28rem);
   font-weight: 750;
   line-height: 1.8;
   margin: 0;
   white-space: pre-wrap;
+}
+
+.detail-body a {
+  color: var(--red-dark);
+  font-weight: 900;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.detail-body a:hover {
+  color: var(--red);
 }
 
 .detail-meta {
