@@ -390,6 +390,10 @@ function renderMarkdownLinks(value) {
   return html + escapeHtml(text.slice(lastIndex));
 }
 
+function renderBodyText(value) {
+  return renderMarkdownLinks(value);
+}
+
 function mediaItemsWithoutExternalLinks(mediaItems = []) {
   return mediaItems.filter((item) => item.type !== "external-link");
 }
@@ -436,7 +440,7 @@ function renderArticleCard(item, { editable = false, actions = "", detailType = 
       </div>
       ${actions}
     </header>
-    <p>${escapeHtml(truncateText(item.body))}</p>
+    <p>${renderBodyText(truncateText(item.body))}</p>
     ${renderMediaItems((item.media_items || item.mediaItems || []).slice(0, 1))}
   </article>`;
 
@@ -453,7 +457,7 @@ function renderAlbumCard(item, { editable = false, actions = "", detailType = "c
       ${actions}
     </header>
     <h3>${escapeHtml(item.title)}</h3>
-    <p>${escapeHtml(truncateText(item.body, 120))}</p>
+    <p>${renderBodyText(truncateText(item.body, 120))}</p>
     ${renderMediaItems(mediaItems.slice(0, 1))}
   </article>`;
 

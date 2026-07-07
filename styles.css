@@ -310,6 +310,30 @@ a {
   resize: vertical;
 }
 
+.body-preview {
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px dashed rgba(51, 17, 9, 0.2);
+  border-radius: 8px;
+  font-weight: 750;
+  line-height: 1.7;
+  min-height: 58px;
+  overflow-wrap: anywhere;
+  padding: 12px 14px;
+  white-space: pre-wrap;
+}
+
+.body-preview.is-empty {
+  color: rgba(51, 17, 9, 0.56);
+}
+
+.body-preview a {
+  color: var(--red-dark);
+  font-weight: 900;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
 .admin-dialog {
   background: transparent;
   border: 0;

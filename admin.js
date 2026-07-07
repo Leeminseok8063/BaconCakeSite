@@ -16,6 +16,7 @@ const entryTitle = document.querySelector("#entryTitle");
 const entrySlug = document.querySelector("#entrySlug");
 const entryExternalUrl = document.querySelector("#entryExternalUrl");
 const entryBody = document.querySelector("#entryBody");
+const entryBodyPreview = document.querySelector("#entryBodyPreview");
 const entryMedia = document.querySelector("#entryMedia");
 const submitEntry = document.querySelector("#submitEntry");
 const cancelEntryEdit = document.querySelector("#cancelEntryEdit");
@@ -68,6 +69,15 @@ function resetEntryEditor() {
   customEntryForm.reset();
   submitEntry.textContent = "글 등록";
   cancelEntryEdit.classList.add("hidden");
+  updateEntryBodyPreview();
+}
+
+function updateEntryBodyPreview() {
+  if (!entryBodyPreview) return;
+
+  const body = entryBody.value.trim();
+  entryBodyPreview.innerHTML = body ? renderBodyText(body) : "본문 미리보기";
+  entryBodyPreview.classList.toggle("is-empty", !body);
 }
 
 function safeFileName(name) {
@@ -457,6 +467,7 @@ customEntryForm.addEventListener("submit", async (event) => {
 });
 
 cancelEntryEdit.addEventListener("click", resetEntryEditor);
+entryBody.addEventListener("input", updateEntryBodyPreview);
 
 customSections.addEventListener("click", async (event) => {
   const button = event.target.closest("button");
@@ -485,6 +496,7 @@ customSections.addEventListener("click", async (event) => {
     entrySlug.value = entry.slug || "";
     entryExternalUrl.value = findExternalLink(entry.mediaItems || entry.media_items || []);
     entryBody.value = entry.body;
+    updateEntryBodyPreview();
     submitEntry.textContent = "수정 저장";
     cancelEntryEdit.classList.remove("hidden");
     customEntryForm.scrollIntoView({ behavior: "smooth", block: "center" });

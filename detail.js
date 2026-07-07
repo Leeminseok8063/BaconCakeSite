@@ -32,7 +32,7 @@ async function renderDetail() {
     <p class="eyebrow">${label}</p>
     <div class="detail-meta">${meta}</div>
     <h1>${escapeHtml(item.title)}</h1>
-    <div class="detail-body">${renderMarkdownLinks(item.body)}</div>
+    <div class="detail-body">${renderBodyText(item.body)}</div>
     ${renderMediaItems(item.mediaItems)}
     <a class="secondary-action" href="${backHref}">${t("listBack")}</a>
   </article>`;
