@@ -9,22 +9,21 @@
   <body>
     <div class="site-shell">
       <header class="topbar">
-        <a class="brand" href="#home" aria-label="BaconCakeOfficial.com 홈">
-          <img src="assets/team-icon.png" alt="BaconCake 로고" />
+        <a class="brand" href="#home" aria-label="BaconCakeOfficial.com home">
+          <img src="assets/team-icon.png" alt="BaconCake logo" />
           <span data-setting="brandName">BaconCakeOfficial.com</span>
         </a>
-        <nav class="main-nav" id="sectionNav" aria-label="섹션 메뉴"></nav>
+        <nav class="main-nav" id="sectionNav" aria-label="Section menu"></nav>
         <button class="root-button" id="adminOpen" type="button">ADMIN</button>
       </header>
 
       <main id="home">
         <section class="hero">
           <div class="hero-copy">
-            <p class="eyebrow" data-setting="heroEyebrow">BaconCake 스튜디오 · 공식</p>
+            <p class="eyebrow" data-setting="heroEyebrow">BaconCake Studio · Official</p>
             <h1 data-setting="heroTitle">BaconCake</h1>
             <p data-setting="heroDescription">
-              BaconCake는 작고 선명한 아이디어를 게임, 웹, 커뮤니티 경험으로 만드는
-              개발사입니다.
+              BaconCake builds sharp little ideas into games, web projects, and community experiences.
             </p>
             <div class="hero-actions" id="heroActions"></div>
           </div>
@@ -36,17 +35,17 @@
 
     <dialog class="admin-dialog" id="adminDialog">
       <form method="dialog" id="adminLoginForm">
-        <button class="close-button" id="adminDialogClose" type="button" aria-label="닫기">×</button>
-        <h2>관리자 로그인</h2>
-        <p>관리자 계정으로 로그인하면 편집 화면으로 이동합니다.</p>
-        <input id="adminEmail" type="email" placeholder="이메일" autocomplete="username" />
-        <input id="adminPassword" type="password" placeholder="비밀번호" autocomplete="current-password" />
-        <button class="primary-action" type="submit">관리자 이동</button>
+        <button class="close-button" id="adminDialogClose" type="button" aria-label="Close">×</button>
+        <h2>Admin Login</h2>
+        <p>Sign in with an admin account to open the editor.</p>
+        <input id="adminEmail" type="email" placeholder="Email" autocomplete="username" />
+        <input id="adminPassword" type="password" placeholder="Password" autocomplete="current-password" />
+        <button class="primary-action" type="submit">Open Admin</button>
         <small id="adminLoginMessage"></small>
       </form>
     </dialog>
 
     <script src="supabase-config.js?v=20260621-7"></script>
-    <script src="site.js?v=20260707-2"></script>
+    <script src="site.js?v=20260714-1"></script>
   </body>
 </html>

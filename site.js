@@ -24,70 +24,70 @@ function redirectStaleCustomDomain() {
 redirectStaleCustomDomain();
 
 const UI_TEXT = {
-  adminAccessTitle: "관리자 로그인",
-  adminAccessBody: "관리자 계정으로 로그인하면 편집 화면으로 이동합니다.",
-  adminEmailPlaceholder: "이메일",
-  adminPasswordPlaceholder: "비밀번호",
-  adminMove: "관리자 이동",
-  adminLoginProgress: "로그인 중입니다...",
-  adminLoginFailure: "로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.",
-  loadingTitle: "불러오는 중입니다.",
-  loadingBody: "잠시만 기다려주세요.",
-  noticeLoadFailure: "공지사항을 불러오지 못했습니다.",
-  studioLoadFailure: "스튜디오 노트를 불러오지 못했습니다.",
-  emptyNoticeTitle: "등록된 공지가 없습니다.",
-  emptyNoticeBody: "새 소식이 등록되면 이곳에 표시됩니다.",
-  emptyStudioTitle: "등록된 스튜디오 노트가 없습니다.",
-  emptyStudioBody: "새 노트가 등록되면 이곳에 표시됩니다.",
+  adminAccessTitle: "Admin Login",
+  adminAccessBody: "Sign in with an admin account to open the editor.",
+  adminEmailPlaceholder: "Email",
+  adminPasswordPlaceholder: "Password",
+  adminMove: "Open Admin",
+  adminLoginProgress: "Signing in...",
+  adminLoginFailure: "Login failed. Check your email and password.",
+  loadingTitle: "Loading",
+  loadingBody: "Please wait a moment.",
+  noticeLoadFailure: "Could not load notices.",
+  studioLoadFailure: "Could not load studio notes.",
+  emptyNoticeTitle: "No notices yet.",
+  emptyNoticeBody: "New updates will appear here.",
+  emptyStudioTitle: "No studio notes yet.",
+  emptyStudioBody: "New notes will appear here.",
   edit: "수정",
   delete: "삭제",
-  notFoundLabel: "내용 없음",
-  notFoundTitle: "내용을 찾을 수 없습니다.",
-  notFoundBody: "삭제되었거나 잘못된 주소일 수 있습니다.",
-  homeBack: "홈으로 돌아가기",
-  listBack: "목록으로 돌아가기",
+  notFoundLabel: "Not Found",
+  notFoundTitle: "We could not find this content.",
+  notFoundBody: "It may have been deleted or the address may be incorrect.",
+  homeBack: "Back Home",
+  listBack: "Back to List",
 };
 
 const defaultSettings = {
   brandName: "BaconCakeOfficial.com",
   siteTitle: "BaconCakeOfficial.com",
-  heroEyebrow: "BaconCake 스튜디오 · 공식",
+  heroEyebrow: "BaconCake Studio · Official",
   heroTitle: "BaconCake",
-  heroDescription: "BaconCake는 작고 선명한 아이디어를 게임, 웹, 커뮤니티 경험으로 만드는 개발사입니다.",
+  heroDescription: "BaconCake builds sharp little ideas into games, web projects, and community experiences.",
 };
 
 const defaultStudioNotes = [
   {
     id: crypto.randomUUID(),
     number: "01",
-    title: "게임 개발",
-    body: "가볍게 시작해 오래 기억되는 플레이 경험을 설계합니다.",
+    title: "Game Development",
+    body: "We design lightweight play experiences that stay memorable.",
   },
   {
     id: crypto.randomUUID(),
     number: "02",
-    title: "웹 경험",
-    body: "브랜드, 커뮤니티, 업데이트 소식을 담는 웹페이지를 만듭니다.",
+    title: "Web Experiences",
+    body: "We build pages for brands, communities, and project updates.",
   },
   {
     id: crypto.randomUUID(),
     number: "03",
-    title: "창작 시스템",
-    body: "작은 팀이 빠르게 운영할 수 있는 도구와 콘텐츠 흐름을 다듬습니다.",
+    title: "Creative Systems",
+    body: "We refine tools and content flows that help small teams move quickly.",
   },
 ];
 
 const defaultPosts = [
   {
     id: crypto.randomUUID(),
-    title: "BaconCake 공식 페이지 오픈",
-    body: "BaconCakeOfficial.com에서 개발 소식과 운영 공지를 확인할 수 있습니다.",
+    title: "BaconCake Official Page Is Live",
+    body: "Find development updates and operation notices on BaconCakeOfficial.com.",
     createdAt: new Date().toISOString(),
   },
   {
     id: crypto.randomUUID(),
-    title: "공지사항 운영 안내",
-    body: "중요 업데이트, 점검, 프로젝트 소식은 이 공지사항 영역에 순서대로 등록됩니다.",
+    title: "Notice Board Guide",
+    body: "Important updates, maintenance notes, and project news will be posted here in order.",
     createdAt: new Date(Date.now() - 86400000).toISOString(),
   },
 ];
@@ -160,7 +160,7 @@ async function supabaseRequest(path, options = {}) {
       },
     });
   } catch (error) {
-    throw new Error(`Supabase 요청을 만들지 못했습니다. 설정 주소와 로그인 세션을 확인하세요. (${error.message})`);
+    throw new Error(`Could not create the Supabase request. Check the configured URL and login session. (${error.message})`);
   }
 
   if (!response.ok) {
@@ -410,7 +410,7 @@ function renderMediaItems(mediaItems = []) {
     ${visibleMediaItems
       .map((item) => {
         const url = escapeHtml(item.url);
-        const name = escapeHtml(item.name || "첨부 파일");
+        const name = escapeHtml(item.name || "Attachment");
         const type = item.type || "";
 
         if (type.startsWith("image/")) {
@@ -453,7 +453,7 @@ function renderAlbumCard(item, { editable = false, actions = "", detailType = "c
   const externalUrl = findExternalLink(mediaItems);
   const content = `<article>
     <header>
-      <span>${escapeHtml(item.number || "항목")}</span>
+      <span>${escapeHtml(item.number || "Item")}</span>
       ${actions}
     </header>
     <h3>${escapeHtml(item.title)}</h3>
@@ -504,13 +504,13 @@ async function renderSectionNav(sections = null) {
   const items = sections || await fetchCustomSections();
   nav.innerHTML = items.length
     ? items.map((section) => `<a href="${sectionHref(section)}">${escapeHtml(section.title)}</a>`).join("")
-    : `<span class="empty-nav">섹션 없음</span>`;
+    : `<span class="empty-nav">No sections</span>`;
 
   const heroActions = document.querySelector("#heroActions");
   if (!heroActions) return;
 
   heroActions.innerHTML = items.length
-    ? `<a class="primary-action" href="#${sectionHash(items[0])}">첫 섹션 보기</a>`
+    ? `<a class="primary-action" href="#${sectionHash(items[0])}">View First Section</a>`
     : "";
 }
 
@@ -592,12 +592,12 @@ async function renderCustomSections({ editable = false } = {}) {
   if (!sections.length) {
     customSections.innerHTML = `<section class="section-grid empty-site">
       <div class="section-heading">
-        <p class="eyebrow">빈 사이트</p>
-        <h2>등록된 섹션이 없습니다.</h2>
+        <p class="eyebrow">Empty Site</p>
+        <h2>No sections have been added yet.</h2>
       </div>
       <article class="notice-card">
-        <h3>어드민 콘솔에서 섹션을 추가하세요.</h3>
-        <p>섹션을 만들면 상단 탭이 자동으로 생기고, 섹션 안의 글은 상세 HTML 페이지처럼 열립니다.</p>
+        <h3>Add sections in the admin console.</h3>
+        <p>When you create a section, a top navigation tab appears automatically and each entry opens as its own detail page.</p>
       </article>
     </section>`;
     return;
@@ -624,7 +624,7 @@ async function renderCustomSections({ editable = false } = {}) {
                 : renderArticleCard(entry, { editable, actions, detailType: "custom" });
             })
             .join("")
-        : `<article class="notice-card"><h3>등록된 콘텐츠가 없습니다.</h3><p>관리자 콘솔에서 콘텐츠를 추가하세요.</p></article>`;
+        : `<article class="notice-card"><h3>No content has been added yet.</h3><p>Add content in the admin console.</p></article>`;
 
       return `<section class="${layoutClass}" id="${sectionHash(section)}">
         <div class="section-heading">
