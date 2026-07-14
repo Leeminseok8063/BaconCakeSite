@@ -255,6 +255,16 @@ a {
   gap: 4px;
 }
 
+.section-title-edit {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.section-title-edit input {
+  max-width: 360px;
+}
+
 .section-admin-item span {
   color: var(--red-dark);
   font-weight: 800;

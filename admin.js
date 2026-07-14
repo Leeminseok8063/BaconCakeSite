@@ -226,6 +226,15 @@ async function updateSection(id, eyebrow, title, slug, layout) {
   });
 }
 
+async function updateSectionTitle(id, title) {
+  await supabaseRequest(`/content_sections?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    authToken: getStoredAdminToken(),
+    prefer: "return=minimal",
+    body: JSON.stringify({ title }),
+  });
+}
+
 async function deleteSection(id) {
   await supabaseRequest(`/content_sections?id=eq.${encodeURIComponent(id)}`, {
     method: "DELETE",
@@ -311,10 +320,15 @@ async function refreshSectionAdmin() {
           return `<article class="section-admin-item">
             <div>
               <strong>${escapeHtml(section.title)}</strong>
+              <label class="section-title-edit">
+                섹션 이름
+                <input type="text" value="${escapeHtml(section.title)}" data-section-title="${section.id}" />
+              </label>
               <span>${escapeHtml(section.eyebrow || "작은 글씨 없음")} · ${section.layout === "album" ? "앨범형" : "작문형"} · 글 ${count}개</span>
               <a href="${sectionUrl}" target="_blank" rel="noreferrer">${sectionUrl}</a>
             </div>
             <div class="notice-actions">
+              <button type="button" data-action="save-section-title" data-id="${section.id}">이름 저장</button>
               <button type="button" data-action="move-section-up" data-id="${section.id}" ${index === 0 ? "disabled" : ""}>위로</button>
               <button type="button" data-action="move-section-down" data-id="${section.id}" ${index === sections.length - 1 ? "disabled" : ""}>아래로</button>
               <button type="button" data-action="edit-section" data-id="${section.id}">수정</button>
@@ -402,6 +416,26 @@ sectionList.addEventListener("click", async (event) => {
   const sections = await fetchCustomSections();
   const section = sections.find((item) => item.id === id);
 
+  if (button.dataset.action === "save-section-title" && section) {
+    const titleField = button.closest(".section-admin-item")?.querySelector(`[data-section-title="${id}"]`);
+    const title = titleField?.value.trim();
+    if (!title) {
+      alert("섹션 이름을 입력해주세요.");
+      return;
+    }
+
+    try {
+      button.disabled = true;
+      await updateSectionTitle(id, title);
+      if (editingSectionId === id) sectionTitle.value = title;
+      await refreshCustomAdminPreview();
+    } catch (error) {
+      alert(adminErrorMessage("섹션 이름 저장", error));
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   if (button.dataset.action === "edit-section" && section) {
     editingSectionId = id;
     sectionEyebrow.value = section.eyebrow || "";
@@ -431,6 +465,15 @@ sectionList.addEventListener("click", async (event) => {
       alert(adminErrorMessage("섹션 삭제", error));
     }
   }
+});
+
+sectionList.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  const titleField = event.target.closest("[data-section-title]");
+  if (!titleField) return;
+
+  event.preventDefault();
+  titleField.closest(".section-admin-item")?.querySelector('[data-action="save-section-title"]')?.click();
 });
 
 customEntryForm.addEventListener("submit", async (event) => {
