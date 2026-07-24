@@ -5,7 +5,7 @@ create table if not exists public.content_sections (
   eyebrow text,
   title text not null,
   slug text,
-  layout text not null default 'article' check (layout in ('article', 'album')),
+  layout text not null default 'article' check (layout in ('article', 'album', 'release')),
   sort_order integer,
   created_at timestamptz not null default now()
 );
@@ -15,6 +15,13 @@ add column if not exists slug text;
 
 alter table public.content_sections
 add column if not exists sort_order integer;
+
+alter table public.content_sections
+drop constraint if exists content_sections_layout_check;
+
+alter table public.content_sections
+add constraint content_sections_layout_check
+check (layout in ('article', 'album', 'release'));
 
 with ranked_sections as (
   select id, row_number() over (order by created_at asc, id asc) * 10 as next_order

@@ -16,6 +16,8 @@
 
 긴 글 작성 제한은 없으며, 섹션 글에는 이미지, 동영상, 오디오, PDF 첨부가 가능합니다.
 
+섹션 형태는 작문형, 앨범형, 릴리즈형을 지원합니다. 릴리즈형은 메인 사진 1장과 Google Play, App Store 등의 링크가 연결된 서브 사진을 여러 장 등록할 수 있습니다.
+
 처음 세팅하거나 RLS 오류가 뜨면 Supabase SQL Editor에서 [`supabase-setup.sql`](./supabase-setup.sql) 전체를 한 번 실행해야 합니다.
 
 이 파일은 아래 항목을 한 번에 정리합니다.
@@ -28,6 +30,7 @@
 - 관리자 작성, 수정, 삭제 권한
 - 섹션/글 상세 URL용 `slug` 컬럼
 - 섹션 순서 변경용 `sort_order` 컬럼
+- 릴리즈형 섹션용 `release` 레이아웃 제약조건
 
 Supabase SQL Editor에서 `Run and enable RLS` 경고가 뜨면 초록 버튼으로 실행해도 됩니다. 실행 후에는 관리자 페이지에서 로그아웃한 뒤 다시 로그인하세요.
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BaconCake 관리자 콘솔</title>
-    <link rel="stylesheet" href="styles.css?v=20260714-2" />
+    <link rel="stylesheet" href="styles.css?v=20260724-1" />
   </head>
   <body class="admin-page">
     <div class="site-shell admin-shell">
@@ -82,6 +82,7 @@
                 <select id="sectionLayout" required>
                   <option value="article">작문형</option>
                   <option value="album">앨범형</option>
+                  <option value="release">릴리즈형</option>
                 </select>
               </label>
             </div>
@@ -117,7 +118,7 @@
                 상세 주소 이름
                 <input id="entrySlug" type="text" placeholder="예: privacy-policy" />
               </label>
-              <label class="wide-field">
+              <label class="wide-field" id="entryExternalUrlField">
                 앨범형 외부 링크
                 <input id="entryExternalUrl" type="text" placeholder="예: https://youtube.com/watch?v=..." />
                 <small>앨범형 섹션에서는 카드 클릭 시 이 링크로 이동합니다. 비워두면 기존 상세페이지로 이동합니다.</small>
@@ -128,11 +129,30 @@
                 <small>입력칸에는 문법이 그대로 보입니다. 본문 링크는 [보여줄 글자](https://example.com) 형식으로 입력하면 아래 미리보기와 상세페이지에서 클릭할 수 있습니다.</small>
                 <div class="body-preview" id="entryBodyPreview" aria-live="polite">본문 미리보기</div>
               </label>
-              <label class="wide-field">
+              <label class="wide-field" id="entryMediaField">
                 첨부 파일
                 <input id="entryMedia" type="file" accept="image/*,video/*,audio/*,application/pdf" multiple />
                 <small>이미지, 동영상, 오디오, PDF를 여러 개 첨부할 수 있습니다. 파일당 최대 500MB까지 업로드할 수 있습니다.</small>
               </label>
+              <div class="wide-field release-editor hidden" id="entryReleaseFields">
+                <div class="release-editor-group">
+                  <div class="release-editor-heading">
+                    <strong>메인 사진</strong>
+                    <button class="secondary-action hidden" id="removeReleaseMain" type="button">현재 사진 제거</button>
+                  </div>
+                  <input id="entryReleaseMain" type="file" accept="image/*" />
+                  <small>릴리즈를 대표하는 큰 이미지를 1장 등록해주세요.</small>
+                  <div class="release-current-main" id="releaseMainPreview"></div>
+                </div>
+                <div class="release-editor-group">
+                  <div class="release-editor-heading">
+                    <strong>서브 사진과 이동 링크</strong>
+                    <button class="secondary-action" id="addReleaseLink" type="button">서브 사진 추가</button>
+                  </div>
+                  <small>Google Play, App Store 등의 다운로드 이미지를 등록하고 이미지마다 이동할 주소를 입력해주세요.</small>
+                  <div class="release-link-editor" id="releaseLinkEditor"></div>
+                </div>
+              </div>
             </div>
             <button class="primary-action" id="submitEntry" type="submit">글 등록</button>
           </form>
@@ -149,7 +169,7 @@
     </div>
 
     <script src="supabase-config.js?v=20260621-7"></script>
-    <script src="site.js?v=20260714-1"></script>
-    <script src="admin.js?v=20260714-2"></script>
+    <script src="site.js?v=20260724-1"></script>
+    <script src="admin.js?v=20260724-1"></script>
   </body>
 </html>

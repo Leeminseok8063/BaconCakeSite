@@ -54,13 +54,16 @@ async function renderDetail() {
   const meta = item.createdAt
     ? `<time datetime="${item.createdAt}">${formatDate(item.createdAt)}</time>`
     : `<span>${escapeHtml(item.number || "")}</span>`;
+  const media = section?.layout === "release"
+    ? renderReleaseMediaItems(item.mediaItems, { detail: true })
+    : renderMediaItems(item.mediaItems);
 
   detailView.innerHTML = `<article class="detail-card">
     <p class="eyebrow">${label}</p>
     <div class="detail-meta">${meta}</div>
     <h1>${escapeHtml(item.title)}</h1>
     <div class="detail-body">${renderDetailBody(item.body)}</div>
-    ${renderMediaItems(item.mediaItems)}
+    ${media}
     <a class="secondary-action" href="${backHref}">${t("listBack")}</a>
   </article>`;
 }

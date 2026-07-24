@@ -402,6 +402,17 @@ function findExternalLink(mediaItems = []) {
   return mediaItems.find((item) => item.type === "external-link")?.url || "";
 }
 
+function findReleaseMain(mediaItems = []) {
+  const visibleItems = mediaItemsWithoutExternalLinks(mediaItems);
+  return visibleItems.find((item) => item.role === "release-main")
+    || visibleItems.find((item) => String(item.type || "").startsWith("image/"))
+    || null;
+}
+
+function findReleaseLinks(mediaItems = []) {
+  return mediaItems.filter((item) => item.role === "release-sub");
+}
+
 function renderMediaItems(mediaItems = []) {
   const visibleMediaItems = mediaItemsWithoutExternalLinks(mediaItems);
   if (!visibleMediaItems.length) return "";
@@ -429,6 +440,32 @@ function renderMediaItems(mediaItems = []) {
       })
       .join("")}
   </div>`;
+}
+
+function renderReleaseMediaItems(mediaItems = [], { detail = false } = {}) {
+  const mainItem = findReleaseMain(mediaItems);
+  const linkItems = findReleaseLinks(mediaItems);
+  if (!mainItem && !linkItems.length) return "";
+
+  const mainImage = mainItem
+    ? `<figure class="release-main-media">
+        <img src="${escapeHtml(mainItem.url)}" alt="${escapeHtml(mainItem.name || "릴리즈 메인 이미지")}" loading="lazy" />
+      </figure>`
+    : "";
+  const links = linkItems.length
+    ? `<div class="release-downloads" aria-label="다운로드 링크">
+        ${linkItems
+          .map((item) => {
+            const image = `<img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.name || "다운로드")}" loading="lazy" />`;
+            return isSafeLinkUrl(item.linkUrl)
+              ? `<a href="${escapeHtml(item.linkUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(item.name || "다운로드")} 링크로 이동">${image}</a>`
+              : `<span class="release-download-disabled">${image}</span>`;
+          })
+          .join("")}
+      </div>`
+    : "";
+
+  return `<div class="release-media${detail ? " release-media-detail" : ""}">${mainImage}${links}</div>`;
 }
 
 function renderArticleCard(item, { editable = false, actions = "", detailType = "custom" } = {}) {
@@ -464,6 +501,26 @@ function renderAlbumCard(item, { editable = false, actions = "", detailType = "c
   if (editable) return content;
   if (externalUrl) return `<a class="card-link" href="${escapeHtml(externalUrl)}" target="_blank" rel="noreferrer">${content}</a>`;
   return `<a class="card-link" href="${itemDetailUrl(detailType, item)}">${content}</a>`;
+}
+
+function renderReleaseCard(item, { editable = false, actions = "", detailType = "custom" } = {}) {
+  const detailUrl = itemDetailUrl(detailType, item);
+  const heading = editable
+    ? `<h3>${escapeHtml(item.title)}</h3>`
+    : `<h3><a class="release-detail-link" href="${detailUrl}">${escapeHtml(item.title)}</a></h3>`;
+
+  return `<article class="release-card">
+    <header>
+      <div>
+        ${item.number ? `<span class="release-label">${escapeHtml(item.number)}</span>` : ""}
+        ${heading}
+      </div>
+      ${actions}
+    </header>
+    <p>${renderBodyText(truncateText(item.body, 220))}</p>
+    ${renderReleaseMediaItems(item.media_items || item.mediaItems || [])}
+    ${editable ? "" : `<a class="secondary-action release-more" href="${detailUrl}">자세히 보기</a>`}
+  </article>`;
 }
 
 function applySettings(settings = loadSettings()) {
@@ -606,8 +663,8 @@ async function renderCustomSections({ editable = false } = {}) {
   const rendered = await Promise.all(
     sections.map(async (section) => {
       const entries = await fetchCustomEntries(section.id);
-      const layoutClass = section.layout === "album" ? "studio-section" : "section-grid";
-      const listClass = section.layout === "album" ? "studio-grid" : "notice-list";
+      const layoutClass = section.layout === "album" ? "studio-section" : `section-grid${section.layout === "release" ? " release-section" : ""}`;
+      const listClass = section.layout === "album" ? "studio-grid" : section.layout === "release" ? "release-list" : "notice-list";
       const cards = entries.length
         ? entries
             .map((entry) => {
@@ -619,9 +676,9 @@ async function renderCustomSections({ editable = false } = {}) {
                   </div>`
                 : "";
 
-              return section.layout === "album"
-                ? renderAlbumCard(entry, { editable, actions, detailType: "custom" })
-                : renderArticleCard(entry, { editable, actions, detailType: "custom" });
+              if (section.layout === "album") return renderAlbumCard(entry, { editable, actions, detailType: "custom" });
+              if (section.layout === "release") return renderReleaseCard(entry, { editable, actions, detailType: "custom" });
+              return renderArticleCard(entry, { editable, actions, detailType: "custom" });
             })
             .join("")
         : `<article class="notice-card"><h3>No content has been added yet.</h3><p>Add content in the admin console.</p></article>`;

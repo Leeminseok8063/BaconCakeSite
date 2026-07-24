@@ -15,15 +15,25 @@ const entryNumber = document.querySelector("#entryNumber");
 const entryTitle = document.querySelector("#entryTitle");
 const entrySlug = document.querySelector("#entrySlug");
 const entryExternalUrl = document.querySelector("#entryExternalUrl");
+const entryExternalUrlField = document.querySelector("#entryExternalUrlField");
 const entryBody = document.querySelector("#entryBody");
 const entryBodyPreview = document.querySelector("#entryBodyPreview");
 const entryMedia = document.querySelector("#entryMedia");
+const entryMediaField = document.querySelector("#entryMediaField");
+const entryReleaseFields = document.querySelector("#entryReleaseFields");
+const entryReleaseMain = document.querySelector("#entryReleaseMain");
+const releaseMainPreview = document.querySelector("#releaseMainPreview");
+const removeReleaseMain = document.querySelector("#removeReleaseMain");
+const addReleaseLink = document.querySelector("#addReleaseLink");
+const releaseLinkEditor = document.querySelector("#releaseLinkEditor");
 const submitEntry = document.querySelector("#submitEntry");
 const cancelEntryEdit = document.querySelector("#cancelEntryEdit");
 const customSections = document.querySelector("#customSections");
 
 let editingSectionId = null;
 let editingEntryId = null;
+let availableSections = [];
+let existingReleaseMain = null;
 const MAX_MEDIA_FILE_SIZE_BYTES = 500 * 1024 * 1024;
 const MAX_MEDIA_FILE_SIZE_LABEL = "500MB";
 
@@ -66,10 +76,93 @@ function resetSectionEditor() {
 
 function resetEntryEditor() {
   editingEntryId = null;
+  existingReleaseMain = null;
   customEntryForm.reset();
+  renderReleaseMainPreview();
+  releaseLinkEditor.innerHTML = "";
   submitEntry.textContent = "글 등록";
   cancelEntryEdit.classList.add("hidden");
   updateEntryBodyPreview();
+  updateEntryLayoutFields();
+}
+
+function selectedEntryLayout() {
+  return availableSections.find((section) => section.id === entrySection.value)?.layout || "article";
+}
+
+function renderReleaseMainPreview(item = existingReleaseMain) {
+  releaseMainPreview.innerHTML = item
+    ? `<img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.name || "현재 메인 사진")}" /><span>${escapeHtml(item.name || "현재 메인 사진")}</span>`
+    : "";
+  removeReleaseMain.classList.toggle("hidden", !item && !entryReleaseMain.files.length);
+}
+
+function addReleaseLinkRow(item = null) {
+  const row = document.createElement("div");
+  row.className = "release-link-row";
+  row._releaseItem = item;
+
+  const preview = document.createElement("div");
+  preview.className = "release-link-preview";
+  if (item?.url) {
+    const image = document.createElement("img");
+    image.src = item.url;
+    image.alt = item.name || "현재 서브 사진";
+    preview.append(image);
+  }
+
+  const fields = document.createElement("div");
+  fields.className = "release-link-fields";
+  const fileLabel = document.createElement("label");
+  fileLabel.textContent = item ? "서브 사진 교체 (선택 사항)" : "서브 사진";
+  const fileInput = document.createElement("input");
+  fileInput.className = "release-sub-file";
+  fileInput.type = "file";
+  fileInput.accept = "image/*";
+  fileLabel.append(fileInput);
+
+  const urlLabel = document.createElement("label");
+  urlLabel.textContent = "이동 링크";
+  const urlInput = document.createElement("input");
+  urlInput.className = "release-sub-url";
+  urlInput.type = "text";
+  urlInput.inputMode = "url";
+  urlInput.placeholder = "https://play.google.com/...";
+  urlInput.value = item?.linkUrl || "";
+  urlLabel.append(urlInput);
+  fields.append(fileLabel, urlLabel);
+
+  const removeButton = document.createElement("button");
+  removeButton.className = "secondary-action release-link-remove";
+  removeButton.type = "button";
+  removeButton.textContent = "삭제";
+
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    preview.innerHTML = "";
+    const image = document.createElement("img");
+    image.src = URL.createObjectURL(file);
+    image.alt = file.name;
+    preview.append(image);
+  });
+  removeButton.addEventListener("click", () => row.remove());
+  row.append(preview, fields, removeButton);
+  releaseLinkEditor.append(row);
+}
+
+function updateEntryLayoutFields() {
+  const layout = selectedEntryLayout();
+  const isAlbum = layout === "album";
+  const isRelease = layout === "release";
+  entryExternalUrlField.classList.toggle("hidden", !isAlbum);
+  entryExternalUrl.disabled = !isAlbum;
+  entryMediaField.classList.toggle("hidden", isRelease);
+  entryMedia.disabled = isRelease;
+  entryReleaseFields.classList.toggle("hidden", !isRelease);
+  entryReleaseMain.disabled = !isRelease;
+
+  if (isRelease && !releaseLinkEditor.children.length && !editingEntryId) addReleaseLinkRow();
 }
 
 function updateEntryBodyPreview() {
@@ -161,6 +254,10 @@ function adminErrorMessage(action, error) {
     return `${action} 실패: 같은 주소 이름(slug)이 이미 있습니다. 다른 주소 이름을 입력해주세요.`;
   }
 
+  if (lowerMessage.includes("check constraint") || message.includes("23514")) {
+    return `${action} 실패: 릴리즈형 데이터베이스 설정이 아직 적용되지 않았습니다. Supabase SQL Editor에서 supabase-setup.sql 전체를 다시 실행해주세요.`;
+  }
+
   if (lowerMessage.includes("jwt") || lowerMessage.includes("expired") || lowerMessage.includes("invalid token")) {
     return `${action} 실패: 관리자 로그인 세션이 만료되었습니다. 로그아웃 후 다시 로그인해주세요.`;
   }
@@ -205,6 +302,45 @@ async function uploadMediaFiles(files, folder) {
       };
     }),
   );
+}
+
+async function collectReleaseMediaItems() {
+  const mainFile = entryReleaseMain.files[0];
+  const rows = [...releaseLinkEditor.querySelectorAll(".release-link-row")];
+
+  if (mainFile && !mainFile.type.startsWith("image/")) throw new Error("메인 사진은 이미지 파일만 등록할 수 있습니다.");
+  if (!mainFile && !existingReleaseMain) throw new Error("릴리즈형에는 메인 사진을 등록해주세요.");
+  if (!rows.length) throw new Error("릴리즈형에는 링크가 연결된 서브 사진을 1장 이상 등록해주세요.");
+
+  const rowData = rows.map((row, index) => {
+    const file = row.querySelector(".release-sub-file").files[0];
+    const linkUrl = normalizeExternalUrl(row.querySelector(".release-sub-url").value);
+    const item = row._releaseItem;
+
+    if (!linkUrl) throw new Error(`${index + 1}번째 서브 사진의 이동 링크를 입력해주세요.`);
+    if (file && !file.type.startsWith("image/")) throw new Error(`${index + 1}번째 서브 사진은 이미지 파일만 등록할 수 있습니다.`);
+    if (!file && !item) throw new Error(`${index + 1}번째 서브 사진을 등록해주세요.`);
+    return { file, item, linkUrl };
+  });
+
+  let mainItem = existingReleaseMain;
+  if (mainFile) {
+    const [uploadedMain] = await uploadMediaFiles([mainFile], "custom-sections/releases");
+    mainItem = uploadedMain;
+  }
+
+  const subItems = await Promise.all(
+    rowData.map(async ({ file, item: existingItem, linkUrl }) => {
+      let item = existingItem;
+      if (file) {
+        const [uploadedItem] = await uploadMediaFiles([file], "custom-sections/releases");
+        item = uploadedItem;
+      }
+      return { ...item, role: "release-sub", linkUrl };
+    }),
+  );
+
+  return [{ ...mainItem, role: "release-main" }, ...subItems];
 }
 
 async function createSection(eyebrow, title, slug, layout) {
@@ -308,9 +444,17 @@ function detailUrlForEntry(entry) {
   return publicUrl(itemDetailUrl("custom", entry));
 }
 
+function sectionLayoutLabel(layout) {
+  if (layout === "album") return "앨범형";
+  if (layout === "release") return "릴리즈형";
+  return "작문형";
+}
+
 async function refreshSectionAdmin() {
+  const selectedSectionId = entrySection.value;
   const sections = await fetchCustomSections();
   const entries = await fetchCustomEntries();
+  availableSections = sections;
 
   sectionList.innerHTML = sections.length
     ? sections
@@ -324,7 +468,7 @@ async function refreshSectionAdmin() {
                 섹션 이름
                 <input type="text" value="${escapeHtml(section.title)}" data-section-title="${section.id}" />
               </label>
-              <span>${escapeHtml(section.eyebrow || "작은 글씨 없음")} · ${section.layout === "album" ? "앨범형" : "작문형"} · 글 ${count}개</span>
+              <span>${escapeHtml(section.eyebrow || "작은 글씨 없음")} · ${sectionLayoutLabel(section.layout)} · 글 ${count}개</span>
               <a href="${sectionUrl}" target="_blank" rel="noreferrer">${sectionUrl}</a>
             </div>
             <div class="notice-actions">
@@ -342,6 +486,8 @@ async function refreshSectionAdmin() {
   entrySection.innerHTML = sections.length
     ? sections.map((section) => `<option value="${section.id}">${escapeHtml(section.title)}</option>`).join("")
     : `<option value="">섹션을 먼저 등록하세요</option>`;
+  if (sections.some((section) => section.id === selectedSectionId)) entrySection.value = selectedSectionId;
+  updateEntryLayoutFields();
 }
 
 async function refreshCustomAdminPreview() {
@@ -488,11 +634,18 @@ customEntryForm.addEventListener("submit", async (event) => {
 
   try {
     submitEntry.disabled = true;
-    const externalUrl = normalizeExternalUrl(entryExternalUrl.value);
     const existingEntry = editingEntryId ? await fetchCustomEntry(editingEntryId) : null;
-    const existingMediaItems = withoutExternalLink(existingEntry?.mediaItems || existingEntry?.media_items || []);
-    const uploadedMedia = await uploadMediaFiles(entryMedia.files, "custom-sections");
-    const mediaItems = mergeMediaWithExternalLink([...existingMediaItems, ...uploadedMedia], externalUrl);
+    const layout = selectedEntryLayout();
+    let mediaItems;
+
+    if (layout === "release") {
+      mediaItems = await collectReleaseMediaItems();
+    } else {
+      const externalUrl = layout === "album" ? normalizeExternalUrl(entryExternalUrl.value) : "";
+      const existingMediaItems = withoutExternalLink(existingEntry?.mediaItems || existingEntry?.media_items || []);
+      const uploadedMedia = await uploadMediaFiles(entryMedia.files, "custom-sections");
+      mediaItems = mergeMediaWithExternalLink([...existingMediaItems, ...uploadedMedia], externalUrl);
+    }
 
     if (editingEntryId) {
       await updateCustomEntry(editingEntryId, sectionId, number, title, slug, body, mediaItems);
@@ -511,6 +664,29 @@ customEntryForm.addEventListener("submit", async (event) => {
 
 cancelEntryEdit.addEventListener("click", resetEntryEditor);
 entryBody.addEventListener("input", updateEntryBodyPreview);
+entrySection.addEventListener("change", updateEntryLayoutFields);
+addReleaseLink.addEventListener("click", () => addReleaseLinkRow());
+entryReleaseMain.addEventListener("change", () => {
+  const file = entryReleaseMain.files[0];
+  if (!file) {
+    renderReleaseMainPreview();
+    return;
+  }
+
+  releaseMainPreview.innerHTML = "";
+  const image = document.createElement("img");
+  image.src = URL.createObjectURL(file);
+  image.alt = file.name;
+  const label = document.createElement("span");
+  label.textContent = file.name;
+  releaseMainPreview.append(image, label);
+  removeReleaseMain.classList.remove("hidden");
+});
+removeReleaseMain.addEventListener("click", () => {
+  existingReleaseMain = null;
+  entryReleaseMain.value = "";
+  renderReleaseMainPreview();
+});
 
 customSections.addEventListener("click", async (event) => {
   const button = event.target.closest("button");
@@ -539,6 +715,12 @@ customSections.addEventListener("click", async (event) => {
     entrySlug.value = entry.slug || "";
     entryExternalUrl.value = findExternalLink(entry.mediaItems || entry.media_items || []);
     entryBody.value = entry.body;
+    const mediaItems = entry.mediaItems || entry.media_items || [];
+    existingReleaseMain = findReleaseMain(mediaItems);
+    renderReleaseMainPreview();
+    releaseLinkEditor.innerHTML = "";
+    findReleaseLinks(mediaItems).forEach((item) => addReleaseLinkRow(item));
+    updateEntryLayoutFields();
     updateEntryBodyPreview();
     submitEntry.textContent = "수정 저장";
     cancelEntryEdit.classList.remove("hidden");
