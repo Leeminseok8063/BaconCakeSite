@@ -541,6 +541,8 @@ a {
 
 .release-list {
   gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 420px));
+  justify-content: start;
 }
 
 .release-card {
@@ -549,7 +551,9 @@ a {
   border-radius: 8px;
   display: grid;
   gap: 16px;
-  padding: clamp(16px, 3vw, 26px);
+  max-width: 420px;
+  padding: 18px;
+  width: 100%;
 }
 
 .release-card header,
@@ -603,6 +607,7 @@ a {
 }
 
 .release-main-media {
+  aspect-ratio: 1 / 1;
   background: rgba(51, 17, 9, 0.08);
   border-radius: 8px;
   margin: 0;
@@ -611,8 +616,8 @@ a {
 
 .release-main-media img {
   display: block;
-  max-height: 680px;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   width: 100%;
 }
 
@@ -640,8 +645,8 @@ a {
 
 .release-downloads img {
   display: block;
-  height: 58px;
-  max-width: min(210px, 70vw);
+  height: 50px;
+  max-width: min(175px, 70vw);
   object-fit: contain;
   width: auto;
 }
@@ -838,7 +843,8 @@ a {
   }
 
   .studio-grid,
-  .settings-grid {
+  .settings-grid,
+  .release-list {
     grid-template-columns: 1fr;
   }
 
