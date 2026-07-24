@@ -519,7 +519,7 @@ function renderReleaseCard(item, { editable = false, actions = "", detailType = 
     </header>
     <p>${renderBodyText(truncateText(item.body, 220))}</p>
     ${renderReleaseMediaItems(item.media_items || item.mediaItems || [])}
-    ${editable ? "" : `<a class="secondary-action release-more" href="${detailUrl}">자세히 보기</a>`}
+    ${editable ? "" : `<a class="secondary-action release-more" href="${detailUrl}">View Details</a>`}
   </article>`;
 }
 
